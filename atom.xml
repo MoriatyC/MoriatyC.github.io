@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Be Better</title>
+  
+  <subtitle>厚积薄发</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2018-01-07T13:09:25.458Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>MoriatyC</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>test</title>
+    <link href="http://yoursite.com/2018/01/07/test/"/>
+    <id>http://yoursite.com/2018/01/07/test/</id>
+    <published>2018-01-07T12:30:35.000Z</published>
+    <updated>2018-01-07T13:09:25.458Z</updated>
+    
+    <content type="html"><![CDATA[<p>这是用来测试好不好用的</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;这是用来测试好不好用的&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+      <category term="jvm" scheme="http://yoursite.com/categories/jvm/"/>
+    
+    
+      <category term="测试" scheme="http://yoursite.com/tags/%E6%B5%8B%E8%AF%95/"/>
+    
+  </entry>
+  
+</feed>
