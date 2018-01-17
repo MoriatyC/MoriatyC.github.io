@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="容器，多线程," />
+  <meta name="keywords" content="容器,多线程," />
 
 
 
@@ -80,19 +80,19 @@
 
 
 <meta name="description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗。 线程池根据《阿里巴巴Java开发手册》中对线程创建的要求   【强制】线程资源必须通过线程池提供，不允许在应">
-<meta name="keywords" content="容器，多线程">
+<meta name="keywords" content="容器,多线程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="初探线程池">
 <meta property="og:url" content="http://yoursite.com/2018/01/17/初探线程池/index.html">
 <meta property="og:site_name" content="Be Better">
 <meta property="og:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗。 线程池根据《阿里巴巴Java开发手册》中对线程创建的要求   【强制】线程资源必须通过线程池提供，不允许在应">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/MoriatyC/MoriatyC.github.io/blob/master/images/mypictures/pool.png">
-<meta property="og:updated_time" content="2018-01-17T07:17:01.081Z">
+<meta property="og:image" content="http://yoursite.com/2018/01/17/images/pool.png">
+<meta property="og:updated_time" content="2018-01-17T08:48:37.781Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初探线程池">
 <meta name="twitter:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗。 线程池根据《阿里巴巴Java开发手册》中对线程创建的要求   【强制】线程资源必须通过线程池提供，不允许在应">
-<meta name="twitter:image" content="https://github.com/MoriatyC/MoriatyC.github.io/blob/master/images/mypictures/pool.png">
+<meta name="twitter:image" content="http://yoursite.com/2018/01/17/images/pool.png">
 
 
 
@@ -417,7 +417,7 @@
 <li>【强制】线程资源必须通过线程池提供，不允许在应用中自行显式创建线程</li>
 </ol>
 </blockquote>
-<p>由此可见，在正式生产环境中，线程池是唯一的创建线程的方法。而JDK对线程池也有强大的支持。<img src="https://github.com/MoriatyC/MoriatyC.github.io/blob/master/images/mypictures/pool.png" alt=""></p>
+<p>由此可见，在正式生产环境中，线程池是唯一的创建线程的方法。而JDK对线程池也有强大的支持。<img src="../images/pool.png" alt=""></p>
 <p>根据《手册》中的另一点要求</p>
 <blockquote>
 <ol>
@@ -475,7 +475,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/容器，多线程/" rel="tag"># 容器，多线程</a>
+            <a href="/tags/容器/" rel="tag"># 容器</a>
+          
+            <a href="/tags/多线程/" rel="tag"># 多线程</a>
           
         </div>
       
@@ -594,7 +596,7 @@
               
               
               <div class="site-state-item site-state-categories">
-                <a href="/categoryies/index.html">
+                <a href="/categories/index.html">
                   <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
@@ -606,7 +608,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/pages/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
