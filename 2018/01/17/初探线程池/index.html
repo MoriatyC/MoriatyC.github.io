@@ -79,19 +79,19 @@
 
 
 
-<meta name="description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗。 线程池根据《阿里巴巴Java开发手册》中对线程创建的要求   【强制】线程资源必须通过线程池提供，不允许在应">
+<meta name="description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
 <meta name="keywords" content="容器,多线程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="初探线程池">
 <meta property="og:url" content="http://yoursite.com/2018/01/17/初探线程池/index.html">
 <meta property="og:site_name" content="Be Better">
-<meta property="og:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗。 线程池根据《阿里巴巴Java开发手册》中对线程创建的要求   【强制】线程资源必须通过线程池提供，不允许在应">
+<meta property="og:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2018/01/17/images/pool.png">
-<meta property="og:updated_time" content="2018-01-17T08:48:37.781Z">
+<meta property="og:updated_time" content="2018-01-23T11:21:18.307Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初探线程池">
-<meta name="twitter:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗。 线程池根据《阿里巴巴Java开发手册》中对线程创建的要求   【强制】线程资源必须通过线程池提供，不允许在应">
+<meta name="twitter:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
 <meta name="twitter:image" content="http://yoursite.com/2018/01/17/images/pool.png">
 
 
@@ -410,7 +410,13 @@
 
       
         <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。</p>
-<p>线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗。</p>
+<p>为什么不无限的创造线程？主要基于以下几个原因：</p>
+<ol>
+<li>线程生命周期的开销非常高</li>
+<li>资源消耗</li>
+<li>稳定性</li>
+</ol>
+<p>所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，由于存在一定数额的活跃线程也提高了响应性。</p>
 <h1 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h1><p>根据《阿里巴巴Java开发手册》中对线程创建的要求</p>
 <blockquote>
 <ol>
@@ -457,6 +463,7 @@
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在使用多线程的时候，要通过<strong>ThreadPoolExecutor</strong>来手动创建，根据当前任务的需求分配相应的线程池大小和阻塞队列以及拒绝策略，这样才能知根知底。</p>
 <h1 id="五-References"><a href="#五-References" class="headerlink" title="五. References"></a>五. References</h1><blockquote>
 <p>《实战Java高并发程序设计》</p>
+<p>《阿里巴巴Java开发手册》</p>
 </blockquote>
 
       
