@@ -87,12 +87,12 @@
 <meta property="og:site_name" content="Be Better">
 <meta property="og:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/2018/01/17/images/pool.png">
-<meta property="og:updated_time" content="2018-01-30T07:22:27.783Z">
+<meta property="og:image" content="http://yoursite.com/2018/01/17/初探线程池/pool.png">
+<meta property="og:updated_time" content="2018-01-30T07:35:48.529Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初探线程池">
 <meta name="twitter:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
-<meta name="twitter:image" content="http://yoursite.com/2018/01/17/images/pool.png">
+<meta name="twitter:image" content="http://yoursite.com/2018/01/17/初探线程池/pool.png">
 
 
 
@@ -423,7 +423,7 @@
 <li>【强制】线程资源必须通过线程池提供，不允许在应用中自行显式创建线程</li>
 </ol>
 </blockquote>
-<p>由此可见，在正式生产环境中，线程池是唯一的创建线程的方法。而JDK对线程池也有强大的支持。<img src="../images/pool.png" alt=""></p>
+<p>由此可见，在正式生产环境中，线程池是唯一的创建线程的方法。而JDK对线程池也有强大的支持。<img src="pool.png" alt=""></p>
 <p>根据《手册》中的另一点要求</p>
 <blockquote>
 <ol>
