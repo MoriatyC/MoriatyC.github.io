@@ -88,7 +88,7 @@
 <meta property="og:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2018/01/17/images/pool.png">
-<meta property="og:updated_time" content="2018-01-23T11:21:18.307Z">
+<meta property="og:updated_time" content="2018-01-30T07:22:27.783Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初探线程池">
 <meta name="twitter:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
@@ -452,7 +452,7 @@
 <li>ArrayBlockingQueue(有界任务队列): 这里就会用到线程池中另一个参数<strong>maximumPoolSize</strong>, 若当前线程池中线程小于corePoolSize则直接在线程池中增加线程，若大于，则加入该任务队列，若队列满则继续加入线程池，若线程池中数目多余maximumPoolSize则执行拒绝策略。</li>
 <li>LinkedBlockingQueue(无界任务队列)：如果未指定容量，那么容量将等于 Integer.MAX_VALUE。只要插入元素不会使双端队列超出容量，每次插入后都将动态地创建链接节点。</li>
 <li>PriorityBlockingQueue(优先任务队列)： 一个特殊的无界任务队列，前面两者都是按FIFO的顺序执行，而这个是可以按照优先级执行。<h2 id="拒绝策略"><a href="#拒绝策略" class="headerlink" title="拒绝策略"></a>拒绝策略</h2>JDK内置拒绝策略如下</li>
-<li>AboerPolicy：直接抛出异常，组织系统正常工作。</li>
+<li>AboerPolicy(默认）：直接抛出异常，阻止系统正常工作。</li>
 <li>CallerRunsPolicy: 只要线程池未关闭，该策略直接在调用者线程中，运行当前被丢弃的任务。（伪丢弃，但是任务提交线程性能大幅度下降）</li>
 <li>DiscardOledestPolicy:和名字一样，丢弃最老的一个请求，也就是即将被执行的一个任务，并尝试再次提交当前任务。</li>
 <li>DiscardPolicy: 丢弃无法处理的任务，不给任何处理。</li>
