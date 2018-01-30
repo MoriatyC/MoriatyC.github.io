@@ -582,7 +582,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/17/初探线程池/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/18/线程池(二)/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="MoriatyC">
@@ -601,7 +601,193 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/01/17/初探线程池/" itemprop="url">初探线程池</a></h1>
+                <a class="post-title-link" href="/2018/01/18/线程池(二)/" itemprop="url">线程池(二)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-18T19:23:19+08:00">
+                2018-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/并发/" itemprop="url" rel="index">
+                    <span itemprop="name">并发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/18/线程池(二)/" class="leancloud_visitors" data-flag-title="线程池(二)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="性能问题"><a href="#性能问题" class="headerlink" title="性能问题"></a>性能问题</h2><h3 id="饥饿死锁"><a href="#饥饿死锁" class="headerlink" title="饥饿死锁"></a>饥饿死锁</h3><p>如果线程池中的任务依赖于之后提交的子任务，当线程池不够大的时候，很容易造成饥饿死锁。所以最好在线程池中加入的是同类型的独立任务。</p>
+<h3 id="运行时间较长的任务"><a href="#运行时间较长的任务" class="headerlink" title="运行时间较长的任务"></a>运行时间较长的任务</h3><p>如果线程运行时间较长也会影响任务的相应性，同样造成不好的体验，所以api有很多方法都带有一个限时版本。</p>
+<h2 id="线程池大小"><a href="#线程池大小" class="headerlink" title="线程池大小"></a>线程池大小</h2><p>线程池的大小需要分析计算环境，资源预算和任务特性。</p>
+<p>一般来说在知道了系统中有多少个cpu和内存的基础下，任务类型是最为重要的。</p>
+<ul>
+<li>对于计算密集型的任务线程池大小为cpu数+1，以实现尽可能的满载利用率</li>
+<li>对于i/o密集型，由于线程不会一直执行，所以规模更大。这里给出一个《Java并发变成实战》这本书提出的一个公式</li>
+</ul>
+<blockquote>
+<p>最佳线程数目 = （线程等待时间/线程CPU时间之比 + 1）<em> CPU数目</em>cpu利用率</p>
+</blockquote>
+<p>即等待时间越长，需要更多的线程。<br>当我们不需要一个那么精准的线程数目时，也可以用这个公式</p>
+<blockquote>
+<p>最佳线程数目 = 2N+1(N为CPU数目)</p>
+</blockquote>
+<h4 id="是否使用线程池就一定比使用单线程高效呢？"><a href="#是否使用线程池就一定比使用单线程高效呢？" class="headerlink" title="是否使用线程池就一定比使用单线程高效呢？"></a>是否使用线程池就一定比使用单线程高效呢？</h4><p>答案是否定的，比如Redis就是单线程的，但它却非常高效，基本操作都能达到十万量级/s。从线程这个角度来看，部分原因在于：</p>
+<ul>
+<li>多线程带来线程上下文切换开销，单线程就没有这种开销</li>
+<li>锁</li>
+<li>当然“Redis很快”更本质的原因在于：Redis基本都是内存操作，这种情况下单线程可以很高效地利用CPU。而多线程适用场景一般是：存在相当比例的IO和网络操作。</li>
+</ul>
+<h2 id="扩展线程池"><a href="#扩展线程池" class="headerlink" title="扩展线程池"></a>扩展线程池</h2><p>ThreadPoolExecutor提供了几个可以在子类化中该学的方法：</p>
+<ul>
+<li>beforeExecute</li>
+<li>afterExecute</li>
+<li>terminated</li>
+</ul>
+<p>如果beforeExecute抛出一个RuntimeException，那么任务将不被执行，并且afterExecute也不会被调用。</p>
+<p>但是无论人物从run中正常返回还是抛出一个异常返回，afterExecute都会被调用，如果任务在完成后带有一个Error，那么久不会调用。</p>
+<p>所有任务都已经完成并且所有工作者线程也已经关闭后，terminated会被调用。</p>
+<p>给出一个demo，他通过这一些列方法来统计任务执行并添加日志。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TimingThreadPool</span> <span class="keyword">extends</span> <span class="title">ThreadPoolExecutor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">TimingThreadPool</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">0L</span>, TimeUnit.SECONDS, <span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ThreadLocal&lt;Long&gt; startTime = <span class="keyword">new</span> ThreadLocal&lt;Long&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Logger log = Logger.getLogger(<span class="string">"TimingThreadPool"</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicLong numTasks = <span class="keyword">new</span> AtomicLong();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicLong totalTime = <span class="keyword">new</span> AtomicLong();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">beforeExecute</span><span class="params">(Thread t, Runnable r)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.beforeExecute(t, r);</span><br><span class="line">        log.fine(String.format(<span class="string">"Thread %s: start %s"</span>, t, r));</span><br><span class="line">        startTime.set(System.nanoTime());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">afterExecute</span><span class="params">(Runnable r, Throwable t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">long</span> endTime = System.nanoTime();</span><br><span class="line">            <span class="keyword">long</span> taskTime = endTime - startTime.get();</span><br><span class="line">            numTasks.incrementAndGet();</span><br><span class="line">            totalTime.addAndGet(taskTime);</span><br><span class="line">            log.fine(String.format(<span class="string">"Thread %s: end %s, time=%dns"</span>,</span><br><span class="line">                    t, r, taskTime));</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.afterExecute(r, t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">terminated</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            log.info(String.format(<span class="string">"Terminated: avg time=%dns"</span>,</span><br><span class="line">                    totalTime.get() / numTasks.get()));</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.terminated();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><blockquote>
+<p><a href="http://ifeve.com/how-to-calculate-threadpool-size/" target="_blank" rel="noopener">http://ifeve.com/how-to-calculate-threadpool-size/</a><br>《Java并发编程实战》</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/17/线程池(一)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MoriatyC">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Be Better">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/17/线程池(一)/" itemprop="url">线程池(一)</a></h1>
         
 
         <div class="post-meta">
@@ -653,7 +839,7 @@
 
           
           
-             <span id="/2018/01/17/初探线程池/" class="leancloud_visitors" data-flag-title="初探线程池">
+             <span id="/2018/01/17/线程池(一)/" class="leancloud_visitors" data-flag-title="线程池(一)">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1002,7 +1188,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1023,7 +1209,7 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/pages/index.html">
+                <a href="/tags/index.html">
                   <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
