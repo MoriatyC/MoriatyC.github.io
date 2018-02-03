@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-01-30T07:47:45.171Z</updated>
+  <updated>2018-02-03T09:33:21.988Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,63 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>缓存穿透、缓存雪崩、hot key</title>
+    <link href="http://yoursite.com/2018/02/03/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E3%80%81%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9%E3%80%81hot-key/"/>
+    <id>http://yoursite.com/2018/02/03/缓存穿透、缓存雪崩、hot-key/</id>
+    <published>2018-02-03T09:29:13.000Z</published>
+    <updated>2018-02-03T09:33:21.988Z</updated>
+    
+    <content type="html"><![CDATA[<p>在做排行榜的时候，对缓存的更新频率产生了一定的疑问，在网上也看了不少博客对这方面的介绍，这里对看到的知识做个总结。</p><h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><p>缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时要查询数据库，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞</p><h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><h4 id="1-空值缓存"><a href="#1-空值缓存" class="headerlink" title="1. 空值缓存"></a>1. 空值缓存</h4><p>这是一个比较简单暴力的方法，如果一个查询返回的数据为空（不管是数据不存在，还是系统故障），我们仍然把这个空结果进行缓存，但它的过期时间会很短，最长不超过五分钟。</p><h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><ul><li><p>空值做了缓存，意味着缓存层中存了更多的键，需要更多的内存空间 ( 如果是攻击，问题更严重 )，比较有效的方法是针对这类数据设置一个较短的过期时间，让其自动剔除。</p></li><li><p>缓存层和存储层的数据会有一段时间窗口的不一致，可能会对业务有一定影响。例如过期时间设置为 5 分钟，如果此时存储层添加了这个数据，那此段时间就会出现缓存层和存储层数据的不一致，此时可以利用消息系统或者其他方式清除掉缓存层中的空对象。</p></li></ul><h4 id="2-Bloom-Filter"><a href="#2-Bloom-Filter" class="headerlink" title="2. Bloom Filter"></a>2. Bloom Filter</h4><p>Bloom Filter是一个占用空间很小、效率很高的随机数据结构，它由一个bit数组和一组Hash算法构成。可用于判断一个元素是否在一个集合中，查询效率很高（1-N，最优能逼近于1）。<br>在很多场景下，我们都需要一个能迅速判断一个元素是否在一个集合中。譬如：</p><ol><li>网页爬虫对URL的去重，避免爬取相同的URL地址；</li><li>反垃圾邮件，从数十亿个垃圾邮件列表中判断某邮箱是否垃圾邮箱（同理，垃圾短信）；</li><li>缓存击穿，将已存在的缓存放到布隆中，当黑客访问不存在的缓存时迅速返回避免缓存及DB挂掉。</li></ol><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>初始化状态是一个全为0的bit数组</p><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/bloom.jpg" alt=""></p><p>为了表达存储N个元素的集合，使用K个独立的函数来进行哈希运算。x1，x2……xk为k个哈希算法。<br>如果集合元素有N1，N2……NN，N1经过x1运算后得到的结果映射的位置标1，经过x2运算后结果映射也标1，已经为1的报错1不变。经过k次散列后，对N1的散列完成。<br>依次对N2，NN等所有数据进行散列，最终得到一个部分为1，部分位为0的字节数组。当然了，这个字节数组会比较长，不然散列效果不好。</p><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/bloom2.jpg" alt=""></p><p>那么怎么判断一个外来的元素是否已经在集合里呢，譬如已经散列了10亿个垃圾邮箱，现在来了一个邮箱，怎么判断它是否在这10亿里面呢？<br>很简单，就拿这个新来的也依次经历x1，x2……xk个哈希算法即可。<br>在任何一个哈希算法譬如到x2时，得到的映射值有0，那就说明这个邮箱肯定不在这10亿内。<br>如果是一个黑名单对象，那么可以肯定的是所有映射都为1，肯定跑不了它。也就是说是坏人，一定会被抓。<br>那么误伤是为什么呢，就是指一些非黑名单对象的值经过k次哈希后，也全部为1，但它确实不是黑名单里的值，这种概率是存在的，但是是可控的。</p><p>至于具体实现，可以直接调用<strong>com.google.guava</strong>中的BloomFilter，就不赘述了。</p><h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><p>平时我们设定一个缓存的过期时间时，可能有一些会设置1分钟啊，5分钟这些，并发很高时可能会出在某一个时间同时生成了很多的缓存，并且过期时间都一样，这个时候就可能引发一当过期时间到后，这些缓存同时失效，请求全部转发到DB，DB可能会压力过重。</p><h3 id="解决方法-1"><a href="#解决方法-1" class="headerlink" title="解决方法"></a>解决方法</h3><ol><li>将缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值，比如1-5分钟随机，这样每一个缓存的过期时间的重复率就会降低，就很难引发集体失效的事件。</li><li>加锁或者队列的方式保证缓存的单线 程（进程）写，从而避免失效时大量的并发请求落到底层存储系统上。</li></ol><h2 id="热key重建"><a href="#热key重建" class="headerlink" title="热key重建"></a>热key重建</h2><p>开发人员使用缓存 + 过期时间的策略既可以加速数据读写，又保证数据的定期更新，这种模式基本能够满足绝大部分需求。但是有两个问题如果同时出现，可能就会对应用造成致命的危害：</p><ul><li>当前 key 是一个热点 key( 例如一个热门的娱乐新闻），并发量非常大。</li><li>重建缓存不能在短时间完成，可能是一个复杂计算，例如复杂的 SQL、多次IO、多个依赖等。</li></ul><p>在缓存失效的瞬间，有大量线程来重建缓存 ( 如下图)，造成后端负载加大，甚至可能会让应用崩溃。<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/hot.png" alt=""></p><p>要解决这个问题也不是很复杂，但是不能为了解决这个问题给系统带来更多的麻烦，所以需要制定如下目标：</p><ul><li>减少重建缓存的次数</li><li>数据尽可能一致</li><li>较少的潜在危险</li></ul><h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><h4 id="1-互斥锁"><a href="#1-互斥锁" class="headerlink" title="1. 互斥锁"></a>1. 互斥锁</h4><p>此方法只允许一个线程重建缓存，其他线程等待重建缓存的线程执行完，重新从缓存获取数据即可。</p><p>这种方案思路比较简单，但是存在一定的隐患，如果构建缓存过程出现问题或者时间较长，可能会存在死锁和线程池阻塞的风险，但是这种方法能够较好的降低后端存储负载并在一致性上做的比较好。</p><h4 id="2-不设置超时时间"><a href="#2-不设置超时时间" class="headerlink" title="2. 不设置超时时间"></a>2. 不设置超时时间</h4><p>“永远不过期”包含两层意思：</p><ul><li>从缓存层面来看，确实没有设置过期时间，所以不会出现热点key过期后产生的问题，也就是“物理”不过期。</li><li>从功能层面来看，为每个value设置一个逻辑过期时间，当发现超过逻辑过期时间后，会使用单独的线程去构建缓存。</li></ul><p>这种方案由于没有设置真正的过期时间，实际上已经不存在热点 key 产生的一系列危害，但是会存在数据不一致的情况，同时代码复杂度会增大。</p><blockquote><p><a href="http://mp.weixin.qq.com/s/TBCEwLVAXdsTszRVpXhVug" target="_blank" rel="noopener">http://mp.weixin.qq.com/s/TBCEwLVAXdsTszRVpXhVug</a><br><a href="http://blog.csdn.net/tianyaleixiaowu/article/details/74721877" target="_blank" rel="noopener">http://blog.csdn.net/tianyaleixiaowu/article/details/74721877</a><br><a href="http://blog.csdn.net/zeb_perfect/article/details/54135506" target="_blank" rel="noopener">http://blog.csdn.net/zeb_perfect/article/details/54135506</a><br><a href="https://zhuanlan.zhihu.com/p/26151305" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/26151305</a></p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;在做排行榜的时候，对缓存的更新频率产生了一定的疑问，在网上也看了不少博客对这方面的介绍，这里对看到的知识做个总结。&lt;/p&gt;
+&lt;h2 id=&quot;缓存穿透&quot;&gt;&lt;a href=&quot;#缓存穿透&quot; class=&quot;headerlink&quot; title=&quot;缓存穿透&quot;&gt;&lt;/a&gt;缓存穿透&lt;/h2&gt;
+      
+    
+    </summary>
+    
+      <category term="数据库" scheme="http://yoursite.com/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+    
+      <category term="redis" scheme="http://yoursite.com/tags/redis/"/>
+    
+      <category term="缓存" scheme="http://yoursite.com/tags/%E7%BC%93%E5%AD%98/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>redis排行榜</title>
+    <link href="http://yoursite.com/2018/02/03/redis%E6%8E%92%E8%A1%8C%E6%A6%9C/"/>
+    <id>http://yoursite.com/2018/02/03/redis排行榜/</id>
+    <published>2018-02-03T09:24:30.000Z</published>
+    <updated>2018-02-03T09:26:22.973Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些跟排行榜本身相关的要求比如：</p><h4 id="排行精确性"><a href="#排行精确性" class="headerlink" title="排行精确性"></a>排行精确性</h4><p>如果一个排行榜的结果关系到用户的权益问题，这个时候一个排行榜的精确性就需要非常高，比如一个运营同学进行了根据微博转发数量的营销活动，这个时候微博转发数量的排行榜就需要非常精确，否则会影响用户权益的分发。</p><h4 id="排行榜实时性"><a href="#排行榜实时性" class="headerlink" title="排行榜实时性"></a>排行榜实时性</h4><p>游戏和社交互动的结合是目前的趋势，对于热门游戏的排行是用户的关注重点，在这部分用户中对于排行的实时性有很高的要求，如果一个用户升级了自己的装备和能力，而自己的排名一直没有更新，那这个用户一定要非常伤心抛弃这个游戏了。所以通过离线计算等平台来构建一个非实时的排行榜系统就不太适合这样的模型。</p><h4 id="海量数据排行"><a href="#海量数据排行" class="headerlink" title="海量数据排行"></a>海量数据排行</h4><p>海量数据是目前的一个趋势，比如对于淘宝全网商品的一个排行，这个榜单将会是一个亿级别的，所以我们设计的榜单也需要具备弹性伸缩能力，同时在对海量数据进行排行的时候拥有一定的实时性。</p><h4 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h4><p>目的是要实现一个热点新闻排行榜的话，毫无疑问，使用的是redis内置的zset这种数据结构，他可以根据score自动产生rank比较方便。我们将评论或者点赞数超过200的认为是热门文章</p><p>由于文章是从别的地方爬过来的，所以只有评论数没有点赞数，设置初始化分数为：</p><p><strong>score = 发布时间毫秒数 + 432 * 评论数</strong></p><p>而问题就在排行榜更新的频率，更新过快，缓存效果不好，会产生类似重建热key的问题（下一篇文章要讲一下），但是频率过慢又不能达到实时性，所以正如之前所说的，要根据排行榜自身的要求制定一个适合的更新策略：</p><p>针对自身的这个项目需求，我想实现的是一个热点新闻排行榜，他的时效性要求并不是很高，所以通过分析网易新闻的爬取量，对爬到的每个新闻建立一个<strong>news：id</strong>进行初始化，并设置一周后过期自动删除，排行榜肯定是用zset的，但是为了不刷新过快，再建立一个zset缓存最近一个星期的文章，通过一个定时任务，每周一次定时维护<strong>time：</strong>，从<strong>time:</strong> 删除时间超过一个星期的文章，并重置<strong>score：</strong>，由于爬虫每隔6小时更新一次，且新闻量相对较小，所以对time：的频繁读写是可以容忍的。所以总的来说就是</p><ol><li>爬取新闻，建立新的hash(news:id),设置过期时间为一周，并加入zset(time：)</li><li>每周执行一次更新，删除zset：中过期的任务，对未过期的任务分数进行更新。</li></ol><table><thead><tr><th>score：</th><th>zset</th></tr></thead><tbody><tr><td>news：id</td><td>分数</td></tr></tbody></table><table><thead><tr><th>time：</th><th>zset</th></tr></thead><tbody><tr><td>news：id</td><td>时间</td></tr></tbody></table><table><thead><tr><th>news：id</th><th>hash</th></tr></thead><tbody><tr><td>voted</td><td>投票数</td></tr><tr><td>title</td><td>xxx </td></tr><tr><td>url</td><td>xxx </td></tr></tbody></table><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Rank</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RedisDao redisDao;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> ONE_WEEK_IN_SECONDS = <span class="number">7</span> * <span class="number">86400</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updataRank</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        redisDao.zRemRangeByRang(<span class="string">"time:"</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">long</span> cutOff = System.currentTimeMillis() / <span class="number">1000</span> - ONE_WEEK_IN_SECONDS;</span><br><span class="line">        Set&lt;TypedTuple&lt;Object&gt;&gt; set = redisDao.zRangeWithScores(<span class="string">"time:"</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (TypedTuple&lt;Object&gt; o: set) &#123;</span><br><span class="line">            <span class="comment">//如果过期直接删除，否则计算结果</span></span><br><span class="line">            <span class="keyword">if</span> (Long.valueOf(o.getScore().toString()) &lt; cutOff) &#123;</span><br><span class="line">                redisDao.zrem(<span class="string">"time:"</span>, o.getValue());</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                redisDao.zadd(<span class="string">"score:"</span>, o.getValue(), </span><br><span class="line">                        Double.valueOf(o.getValue().toString()) + </span><br><span class="line">                        <span class="number">432</span> * Double.valueOf(redisDao.hget(o.getValue().toString(), <span class="string">"commentCount"</span>).toString()));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>完整代码请参考：</p><blockquote><p><a href="https://github.com/MoriatyC/OmegaNews" target="_blank" rel="noopener">https://github.com/MoriatyC/OmegaNews</a></p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;设计思路&quot;&gt;&lt;a href=&quot;#设计思路&quot; class=&quot;headerlink&quot; title=&quot;设计思路&quot;&gt;&lt;/a&gt;设计思路&lt;/h2&gt;&lt;p&gt;因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些
+      
+    
+    </summary>
+    
+      <category term="数据库" scheme="http://yoursite.com/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+    
+      <category term="redis" scheme="http://yoursite.com/tags/redis/"/>
+    
+      <category term="缓存" scheme="http://yoursite.com/tags/%E7%BC%93%E5%AD%98/"/>
+    
+      <category term="spring" scheme="http://yoursite.com/tags/spring/"/>
+    
+  </entry>
   
   <entry>
     <title>redis数据安全与性能保障</title>

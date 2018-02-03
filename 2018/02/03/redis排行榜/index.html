@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="容器,多线程," />
+  <meta name="keywords" content="redis,缓存,spring," />
 
 
 
@@ -79,20 +79,18 @@
 
 
 
-<meta name="description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
-<meta name="keywords" content="容器,多线程">
+<meta name="description" content="设计思路因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些跟排行榜本身相关的要求比如： 排行精确性如果一个排行榜的结果关系到用户的权益问题，这个时候一个排行榜的精确性就需要非常高，比如一个运营同学进行了根据微博转发数量的营销活动，这个时候微博转发数量的排行榜就需要非常精确，否则会影响用户权益的分发。 排行榜实时性游戏和社交互">
+<meta name="keywords" content="redis,缓存,spring">
 <meta property="og:type" content="article">
-<meta property="og:title" content="初探线程池">
-<meta property="og:url" content="http://yoursite.com/2018/01/17/初探线程池/index.html">
+<meta property="og:title" content="redis排行榜">
+<meta property="og:url" content="http://yoursite.com/2018/02/03/redis排行榜/index.html">
 <meta property="og:site_name" content="Be Better">
-<meta property="og:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
+<meta property="og:description" content="设计思路因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些跟排行榜本身相关的要求比如： 排行精确性如果一个排行榜的结果关系到用户的权益问题，这个时候一个排行榜的精确性就需要非常高，比如一个运营同学进行了根据微博转发数量的营销活动，这个时候微博转发数量的排行榜就需要非常精确，否则会影响用户权益的分发。 排行榜实时性游戏和社交互">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/pool.png">
-<meta property="og:updated_time" content="2018-01-30T07:47:34.010Z">
+<meta property="og:updated_time" content="2018-02-03T09:26:22.973Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="初探线程池">
-<meta name="twitter:description" content="概述这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。 为什么不无限的创造线程？主要基于以下几个原因：  线程生命周期的开销非常高 资源消耗 稳定性  所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/pool.png">
+<meta name="twitter:title" content="redis排行榜">
+<meta name="twitter:description" content="设计思路因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些跟排行榜本身相关的要求比如： 排行精确性如果一个排行榜的结果关系到用户的权益问题，这个时候一个排行榜的精确性就需要非常高，比如一个运营同学进行了根据微博转发数量的营销活动，这个时候微博转发数量的排行榜就需要非常精确，否则会影响用户权益的分发。 排行榜实时性游戏和社交互">
 
 
 
@@ -122,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/17/初探线程池/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/02/03/redis排行榜/"/>
 
 
 
 
 
-  <title>初探线程池 | Be Better</title>
+  <title>redis排行榜 | Be Better</title>
   
 
 
@@ -309,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/17/初探线程池/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/03/redis排行榜/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="MoriatyC">
@@ -326,7 +324,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">初探线程池</h1>
+          <h1 class="post-title" itemprop="name headline">redis排行榜</h1>
         
 
         <div class="post-meta">
@@ -338,8 +336,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-17T11:17:20+08:00">
-                2018-01-17
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-03T17:24:30+08:00">
+                2018-02-03
               </time>
             
 
@@ -361,8 +359,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/并发/" itemprop="url" rel="index">
-                    <span itemprop="name">并发</span>
+                  <a href="/categories/数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
                   </a>
                 </span>
 
@@ -378,7 +376,7 @@
 
           
           
-             <span id="/2018/01/17/初探线程池/" class="leancloud_visitors" data-flag-title="初探线程池">
+             <span id="/2018/02/03/redis排行榜/" class="leancloud_visitors" data-flag-title="redis排行榜">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -409,61 +407,73 @@
       
 
       
-        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。</p>
-<p>为什么不无限的创造线程？主要基于以下几个原因：</p>
+        <h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些跟排行榜本身相关的要求比如：</p>
+<h4 id="排行精确性"><a href="#排行精确性" class="headerlink" title="排行精确性"></a>排行精确性</h4><p>如果一个排行榜的结果关系到用户的权益问题，这个时候一个排行榜的精确性就需要非常高，比如一个运营同学进行了根据微博转发数量的营销活动，这个时候微博转发数量的排行榜就需要非常精确，否则会影响用户权益的分发。</p>
+<h4 id="排行榜实时性"><a href="#排行榜实时性" class="headerlink" title="排行榜实时性"></a>排行榜实时性</h4><p>游戏和社交互动的结合是目前的趋势，对于热门游戏的排行是用户的关注重点，在这部分用户中对于排行的实时性有很高的要求，如果一个用户升级了自己的装备和能力，而自己的排名一直没有更新，那这个用户一定要非常伤心抛弃这个游戏了。所以通过离线计算等平台来构建一个非实时的排行榜系统就不太适合这样的模型。</p>
+<h4 id="海量数据排行"><a href="#海量数据排行" class="headerlink" title="海量数据排行"></a>海量数据排行</h4><p>海量数据是目前的一个趋势，比如对于淘宝全网商品的一个排行，这个榜单将会是一个亿级别的，所以我们设计的榜单也需要具备弹性伸缩能力，同时在对海量数据进行排行的时候拥有一定的实时性。</p>
+<h4 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h4><p>目的是要实现一个热点新闻排行榜的话，毫无疑问，使用的是redis内置的zset这种数据结构，他可以根据score自动产生rank比较方便。我们将评论或者点赞数超过200的认为是热门文章</p>
+<p>由于文章是从别的地方爬过来的，所以只有评论数没有点赞数，设置初始化分数为：</p>
+<p><strong>score = 发布时间毫秒数 + 432 * 评论数</strong></p>
+<p>而问题就在排行榜更新的频率，更新过快，缓存效果不好，会产生类似重建热key的问题（下一篇文章要讲一下），但是频率过慢又不能达到实时性，所以正如之前所说的，要根据排行榜自身的要求制定一个适合的更新策略：</p>
+<p>针对自身的这个项目需求，我想实现的是一个热点新闻排行榜，他的时效性要求并不是很高，所以通过分析网易新闻的爬取量，对爬到的每个新闻建立一个<strong>news：id</strong>进行初始化，并设置一周后过期自动删除，排行榜肯定是用zset的，但是为了不刷新过快，再建立一个zset缓存最近一个星期的文章，通过一个定时任务，每周一次定时维护<strong>time：</strong>，从<strong>time:</strong> 删除时间超过一个星期的文章，并重置<strong>score：</strong>，由于爬虫每隔6小时更新一次，且新闻量相对较小，所以对time：的频繁读写是可以容忍的。所以总的来说就是</p>
 <ol>
-<li>线程生命周期的开销非常高</li>
-<li>资源消耗</li>
-<li>稳定性</li>
+<li>爬取新闻，建立新的hash(news:id),设置过期时间为一周，并加入zset(time：)</li>
+<li>每周执行一次更新，删除zset：中过期的任务，对未过期的任务分数进行更新。</li>
 </ol>
-<p>所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，由于存在一定数额的活跃线程也提高了响应性。</p>
-<h1 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h1><p>根据《阿里巴巴Java开发手册》中对线程创建的要求</p>
+<table>
+<thead>
+<tr>
+<th>score：</th>
+<th>zset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>news：id</td>
+<td>分数</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>time：</th>
+<th>zset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>news：id</td>
+<td>时间</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>news：id</th>
+<th>hash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>voted</td>
+<td>投票数</td>
+</tr>
+<tr>
+<td>title</td>
+<td>xxx </td>
+</tr>
+<tr>
+<td>url</td>
+<td>xxx </td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Rank</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RedisDao redisDao;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> ONE_WEEK_IN_SECONDS = <span class="number">7</span> * <span class="number">86400</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updataRank</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        redisDao.zRemRangeByRang(<span class="string">"time:"</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">long</span> cutOff = System.currentTimeMillis() / <span class="number">1000</span> - ONE_WEEK_IN_SECONDS;</span><br><span class="line">        Set&lt;TypedTuple&lt;Object&gt;&gt; set = redisDao.zRangeWithScores(<span class="string">"time:"</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (TypedTuple&lt;Object&gt; o: set) &#123;</span><br><span class="line">            <span class="comment">//如果过期直接删除，否则计算结果</span></span><br><span class="line">            <span class="keyword">if</span> (Long.valueOf(o.getScore().toString()) &lt; cutOff) &#123;</span><br><span class="line">                redisDao.zrem(<span class="string">"time:"</span>, o.getValue());</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                redisDao.zadd(<span class="string">"score:"</span>, o.getValue(), </span><br><span class="line">                        Double.valueOf(o.getValue().toString()) + </span><br><span class="line">                        <span class="number">432</span> * Double.valueOf(redisDao.hget(o.getValue().toString(), <span class="string">"commentCount"</span>).toString()));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>完整代码请参考：</p>
 <blockquote>
-<ol>
-<li>【强制】线程资源必须通过线程池提供，不允许在应用中自行显式创建线程</li>
-</ol>
-</blockquote>
-<p>由此可见，在正式生产环境中，线程池是唯一的创建线程的方法。而JDK对线程池也有强大的支持。<img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/pool.png" alt=""></p>
-<p>根据《手册》中的另一点要求</p>
-<blockquote>
-<ol>
-<li>【强制】线程池不允许使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样<br>的处理方式让写的同学更加明确线程池的运行规则，规避资源耗尽的风险。<br>说明： Executors 返回的线程池对象的弊端如下：<br>1） FixedThreadPool 和 SingleThreadPool:<br>允许的请求队列长度为 Integer.MAX_VALUE，可能会堆积大量的请求，从而导致 OOM。<br>2） CachedThreadPool 和 ScheduledThreadPool:<br>允许的创建线程数量为 Integer.MAX_VALUE， 可能会创建大量的线程，从而导致 OOM</li>
-</ol>
-</blockquote>
-<p>虽然Executor为我们提供了很多方便的工厂方法，比如<strong>newSingleThreadExecutor()</strong>,也有Executors为我们很好的实现了这些工厂方法，但是手动实现<strong>ThreadPoolExecutor</strong>能让我们对线程池有更深的了解和控制。所以接下来让我们来介绍一下<strong>ThreadPoolExecutor</strong>这个类。</p>
-<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>一个最常见的<strong>ThreadPoolExecutor</strong>构造函数如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ThreadPoolExecutor(<span class="keyword">int</span> corePoolSize, </span><br><span class="line">                   <span class="keyword">int</span> maximumPoolSize, </span><br><span class="line">                   <span class="keyword">long</span> keepAliveTime, </span><br><span class="line">                   TimeUnit unit, </span><br><span class="line">                   BlockingQueue&lt;Runnable&gt; workQueue, </span><br><span class="line">                   ThreadFactory threadFactory, </span><br><span class="line">                   RejectedExecutionHandler handler)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>corePoolSize： 活动线程数</li>
-<li>maximumPoolSize： 线程池上限</li>
-<li>keepAliveTime： 当线程池中线程数超过corePoolSize后，完成工作后的线程存活时间</li>
-<li>unit： 单位<br>其余的几个参数我们会在后面着重介绍。</li>
-</ul>
-<p>这里介绍一下ThreadPoolExecutor的核心工作原理</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> c = ctl.get();</span><br><span class="line">        <span class="keyword">if</span> (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">            <span class="keyword">if</span> (addWorker(command, <span class="keyword">true</span>))</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            c = ctl.get();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">            <span class="keyword">int</span> recheck = ctl.get();</span><br><span class="line">            <span class="keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">                reject(command);</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>)</span><br><span class="line">                addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="keyword">false</span>))</span><br><span class="line">            reject(command);</span><br></pre></td></tr></table></figure>
-<p>workderCountOf()获得当前线程池线程总数，若小于corePoolSize，则直接将任务通过addWorker<br>()方法执行，否则在workQueue.offer()进入等待队列，若进入失败，则任务直接交给线程池，若线程池达到了maximumPoolSize则提交失败执行拒绝策略</p>
-<h2 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h2><h3 id="BlockingQueue：接口，阻塞队列，数据共享通道"><a href="#BlockingQueue：接口，阻塞队列，数据共享通道" class="headerlink" title="BlockingQueue：接口，阻塞队列，数据共享通道"></a>BlockingQueue：接口，阻塞队列，数据共享通道</h3><p>任务队列的作用在于，当线程池中线程数达到corePoolSize的时候，接下来的任务将进入这个队列进行等待，等待执行。</p>
-<h4 id="简单原理"><a href="#简单原理" class="headerlink" title="简单原理"></a>简单原理</h4><p>服务线程（获取队列信息并处理的线程）在队列为空时进行读等待，有新的消息进入队列后自动唤醒，反之，当队列满时进行写等待直到有消息出队。</p>
-<p>不同于常用的offer()和poll()方法，这里我们使用take()和put()方法进行读写。我们以ArrayBlockingQueue的为例子,其中包括了这几个控制对象<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> ReentrantLock lick;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notEmpty;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notFull;</span><br></pre></td></tr></table></figure></p>
-<p>就拿take()来说<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">take</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (count == <span class="number">0</span>)</span><br><span class="line">            notEmpty.await();</span><br><span class="line">        <span class="keyword">return</span> dequeue();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>当队列为空时，他会在<strong>notEmpty</strong>上进行等待，<br>在线程等待时，若有新的元素插入，线程就会被唤醒<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(E x)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert lock.getHoldCount() == 1;</span></span><br><span class="line">    <span class="comment">// assert items[putIndex] == null;</span></span><br><span class="line">    <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">    items[putIndex] = x;</span><br><span class="line">    <span class="keyword">if</span> (++putIndex == items.length)</span><br><span class="line">        putIndex = <span class="number">0</span>;</span><br><span class="line">    count++;</span><br><span class="line">    notEmpty.signal();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="常用实现"><a href="#常用实现" class="headerlink" title="常用实现"></a>常用实现</h4><ul>
-<li>SynchronousQueue(直接提交队列): 一个零容量队列，每个插入操作要对应一个删除操作。提交的任务不会被真实保存，其实就是将新任务交给了线程执行。</li>
-<li>ArrayBlockingQueue(有界任务队列): 这里就会用到线程池中另一个参数<strong>maximumPoolSize</strong>, 若当前线程池中线程小于corePoolSize则直接在线程池中增加线程，若大于，则加入该任务队列，若队列满则继续加入线程池，若线程池中数目多余maximumPoolSize则执行拒绝策略。</li>
-<li>LinkedBlockingQueue(无界任务队列)：如果未指定容量，那么容量将等于 Integer.MAX_VALUE。只要插入元素不会使双端队列超出容量，每次插入后都将动态地创建链接节点。</li>
-<li>PriorityBlockingQueue(优先任务队列)： 一个特殊的无界任务队列，前面两者都是按FIFO的顺序执行，而这个是可以按照优先级执行。<h2 id="拒绝策略"><a href="#拒绝策略" class="headerlink" title="拒绝策略"></a>拒绝策略</h2>JDK内置拒绝策略如下</li>
-<li>AboerPolicy(默认）：直接抛出异常，阻止系统正常工作。</li>
-<li>CallerRunsPolicy: 只要线程池未关闭，该策略直接在调用者线程中，运行当前被丢弃的任务。（伪丢弃，但是任务提交线程性能大幅度下降）</li>
-<li>DiscardOledestPolicy:和名字一样，丢弃最老的一个请求，也就是即将被执行的一个任务，并尝试再次提交当前任务。</li>
-<li>DiscardPolicy: 丢弃无法处理的任务，不给任何处理。</li>
-</ul>
-<h2 id="异常堆栈"><a href="#异常堆栈" class="headerlink" title="异常堆栈"></a>异常堆栈</h2><p>首先给出一个例子：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a, b;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Main</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.a = a;</span><br><span class="line">        <span class="keyword">this</span>.b = b;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ret = a / b;</span><br><span class="line">        System.out.println(ret);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ThreadPoolExecutor pools = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">0</span>, Integer.MAX_VALUE, <span class="number">0L</span>, TimeUnit.SECONDS, </span><br><span class="line">                <span class="keyword">new</span> SynchronousQueue&lt;Runnable&gt;());</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            pools.submit(<span class="keyword">new</span> Main(<span class="number">100</span>, i));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 结果如下</span></span><br><span class="line"><span class="comment">100</span></span><br><span class="line"><span class="comment">33</span></span><br><span class="line"><span class="comment">50</span></span><br><span class="line"><span class="comment">25</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></p>
-<p>可以发现，其中一个显然的异常除数为0不见了，我们可以通过将submit方法改为execute方法来打印部分异常信息，但是我们仍然不能发现他的调用线程在哪儿。<br>这里我们通过扩展线程池给出一种解决办法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> first_maven;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Future;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.SynchronousQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ThreadPoolExecutor;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> <span class="keyword">extends</span> <span class="title">ThreadPoolExecutor</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Main</span><span class="params">(<span class="keyword">int</span> corePoolSize, <span class="keyword">int</span> maximumPoolSize, <span class="keyword">long</span> keepAliveTime, TimeUnit unit,</span></span></span><br><span class="line"><span class="function"><span class="params">            BlockingQueue&lt;Runnable&gt; workQueue)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable task)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.execute(wrap(task, clientTrace(), Thread.currentThread().getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Future&lt;?&gt; submit(Runnable task) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.submit(wrap(task, clientTrace(), Thread.currentThread().getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> Exception <span class="title">clientTrace</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Exception(<span class="string">"Client stack trace"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> Runnable <span class="title">wrap</span><span class="params">(<span class="keyword">final</span> Runnable task, <span class="keyword">final</span> Exception clientStack, String clientThreadName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    task.run();</span><br><span class="line">                &#125; <span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">                    clientStack.printStackTrace();</span><br><span class="line">                    System.out.println(<span class="string">"                             1212"</span>);</span><br><span class="line">                    <span class="keyword">throw</span> e;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>我们通过扩展<strong>ThreadPoolExecutor</strong>，将要执行的Runnable进行包装，通过手动创建异常，获取当前主线程的调用堆栈，从而得到线程池的调用信息，并打印相应的运行异常，这样我们就可以追踪到完整的异常信息。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在使用多线程的时候，要通过<strong>ThreadPoolExecutor</strong>来手动创建，根据当前任务的需求分配相应的线程池大小和阻塞队列以及拒绝策略，这样才能知根知底。</p>
-<h1 id="五-References"><a href="#五-References" class="headerlink" title="五. References"></a>五. References</h1><blockquote>
-<p>《实战Java高并发程序设计》</p>
-<p>《阿里巴巴Java开发手册》</p>
+<p><a href="https://github.com/MoriatyC/OmegaNews" target="_blank" rel="noopener">https://github.com/MoriatyC/OmegaNews</a></p>
 </blockquote>
 
       
@@ -482,9 +492,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/容器/" rel="tag"># 容器</a>
+            <a href="/tags/redis/" rel="tag"># redis</a>
           
-            <a href="/tags/多线程/" rel="tag"># 多线程</a>
+            <a href="/tags/缓存/" rel="tag"># 缓存</a>
+          
+            <a href="/tags/spring/" rel="tag"># spring</a>
           
         </div>
       
@@ -497,8 +509,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/13/工厂模式/" rel="next" title="工厂模式">
-                <i class="fa fa-chevron-left"></i> 工厂模式
+              <a href="/2018/01/29/redis数据安全与性能保障/" rel="next" title="redis数据安全与性能保障">
+                <i class="fa fa-chevron-left"></i> redis数据安全与性能保障
               </a>
             
           </div>
@@ -507,8 +519,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/29/redis数据安全与性能保障/" rel="prev" title="redis数据安全与性能保障">
-                redis数据安全与性能保障 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/02/03/缓存穿透、缓存雪崩、hot-key/" rel="prev" title="缓存穿透、缓存雪崩、hot key">
+                缓存穿透、缓存雪崩、hot key <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -597,7 +609,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -619,7 +631,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/pages/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -652,7 +664,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程池"><span class="nav-number">2.</span> <span class="nav-text">线程池</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">2.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#任务队列"><span class="nav-number">2.2.</span> <span class="nav-text">任务队列</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BlockingQueue：接口，阻塞队列，数据共享通道"><span class="nav-number">2.2.1.</span> <span class="nav-text">BlockingQueue：接口，阻塞队列，数据共享通道</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#简单原理"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">简单原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#常用实现"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">常用实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拒绝策略"><span class="nav-number">2.3.</span> <span class="nav-text">拒绝策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异常堆栈"><span class="nav-number">2.4.</span> <span class="nav-text">异常堆栈</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五-References"><span class="nav-number">4.</span> <span class="nav-text">五. References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#设计思路"><span class="nav-number">1.</span> <span class="nav-text">设计思路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#排行精确性"><span class="nav-number">1.0.1.</span> <span class="nav-text">排行精确性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#排行榜实时性"><span class="nav-number">1.0.2.</span> <span class="nav-text">排行榜实时性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#海量数据排行"><span class="nav-number">1.0.3.</span> <span class="nav-text">海量数据排行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现方法"><span class="nav-number">1.0.4.</span> <span class="nav-text">实现方法</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
