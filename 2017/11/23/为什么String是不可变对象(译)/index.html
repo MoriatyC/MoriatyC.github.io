@@ -79,19 +79,19 @@
 
 
 
-<meta name="description" content="原文:Why String is immutable in Java ?  String是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改（老外好啰嗦…）。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。 1. 字符串池的需求字符串池">
+<meta name="description" content="原文:Why String is immutable in Java ?  String是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。 1. 字符串池的需求字符串池是一个位于方法区">
 <meta name="keywords" content="源码分析,多线程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="为什么String是不可变对象(译)">
 <meta property="og:url" content="http://yoursite.com/2017/11/23/为什么String是不可变对象(译)/index.html">
 <meta property="og:site_name" content="Be Better">
-<meta property="og:description" content="原文:Why String is immutable in Java ?  String是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改（老外好啰嗦…）。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。 1. 字符串池的需求字符串池">
+<meta property="og:description" content="原文:Why String is immutable in Java ?  String是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。 1. 字符串池的需求字符串池是一个位于方法区">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/String.png">
-<meta property="og:updated_time" content="2018-02-23T03:20:23.987Z">
+<meta property="og:updated_time" content="2018-02-23T03:22:21.787Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="为什么String是不可变对象(译)">
-<meta name="twitter:description" content="原文:Why String is immutable in Java ?  String是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改（老外好啰嗦…）。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。 1. 字符串池的需求字符串池">
+<meta name="twitter:description" content="原文:Why String is immutable in Java ?  String是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。 1. 字符串池的需求字符串池是一个位于方法区">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/String.png">
 
 
@@ -410,7 +410,7 @@
 
       
         <p>原文:<a href="http://www.programcreek.com/2013/04/why-string-is-immutable-in-java/" target="_blank" rel="noopener">Why String is immutable in Java ? </a></p>
-<p><strong>String</strong>是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改（老外好啰嗦…）。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。</p>
+<p><strong>String</strong>是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。</p>
 <h1 id="1-字符串池的需求"><a href="#1-字符串池的需求" class="headerlink" title="1. 字符串池的需求"></a>1. 字符串池的需求</h1><p>字符串池是一个位于方法区的特殊区域。当一个字符串被创建的时候，如果该字符串已经存在于字符串池中，那么直接返回该字符串的引用，而不是创建一个新的字符串。<br>下边的代码将只会创建一个字符串对象：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="string">"abcd"</span>;</span><br><span class="line">String s2 = <span class="string">"abcd"</span>;</span><br></pre></td></tr></table></figure></p>
 <p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/String.png" alt=""></p>
 <p>s1和s2都指向同一个字符串对象。<br>如果String不是不可变的，那么修改s1的字符串对象同样也会导致s2的内容发生变化。</p>
@@ -421,6 +421,9 @@
 <p>（虽然略牵强，但是也有一定道理）</p>
 <h1 id="5-不可变的对象本身就是线程安全的"><a href="#5-不可变的对象本身就是线程安全的" class="headerlink" title="5. 不可变的对象本身就是线程安全的"></a>5. 不可变的对象本身就是线程安全的</h1><p>不可变的对象，可以在多个线程间自由共享。从而免除了进行同步的麻烦。</p>
 <p>总之， String被设计为不可变的类，是出于性能和安全性的考虑，这也是其他所有不可变类应用的初衷。</p>
+<h1 id="6-引用"><a href="#6-引用" class="headerlink" title="6. 引用"></a>6. 引用</h1><blockquote>
+<p><a href="http://blog.csdn.net/get_set/article/details/49926511" target="_blank" rel="noopener">http://blog.csdn.net/get_set/article/details/49926511</a></p>
+</blockquote>
 
       
     </div>
@@ -570,7 +573,7 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/pages/index.html">
+                <a href="/tags/index.html">
                   <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
@@ -604,7 +607,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-字符串池的需求"><span class="nav-number">1.</span> <span class="nav-text">1. 字符串池的需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-缓存Hashcode"><span class="nav-number">2.</span> <span class="nav-text">2. 缓存Hashcode</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-简化其他对象的使用"><span class="nav-number">3.</span> <span class="nav-text">3. 简化其他对象的使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-安全性"><span class="nav-number">4.</span> <span class="nav-text">4.安全性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-不可变的对象本身就是线程安全的"><span class="nav-number">5.</span> <span class="nav-text">5. 不可变的对象本身就是线程安全的</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-字符串池的需求"><span class="nav-number">1.</span> <span class="nav-text">1. 字符串池的需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-缓存Hashcode"><span class="nav-number">2.</span> <span class="nav-text">2. 缓存Hashcode</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-简化其他对象的使用"><span class="nav-number">3.</span> <span class="nav-text">3. 简化其他对象的使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-安全性"><span class="nav-number">4.</span> <span class="nav-text">4.安全性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-不可变的对象本身就是线程安全的"><span class="nav-number">5.</span> <span class="nav-text">5. 不可变的对象本身就是线程安全的</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-引用"><span class="nav-number">6.</span> <span class="nav-text">6. 引用</span></a></li></ol></div>
             
 
           </div>
