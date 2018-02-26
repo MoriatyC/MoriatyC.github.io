@@ -121,13 +121,13 @@
       <category term="数据库" scheme="http://yoursite.com/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
     
     
+      <category term="事务" scheme="http://yoursite.com/tags/%E4%BA%8B%E5%8A%A1/"/>
+    
       <category term="redis" scheme="http://yoursite.com/tags/redis/"/>
     
       <category term="nosql" scheme="http://yoursite.com/tags/nosql/"/>
     
       <category term="持久化" scheme="http://yoursite.com/tags/%E6%8C%81%E4%B9%85%E5%8C%96/"/>
-    
-      <category term="事务" scheme="http://yoursite.com/tags/%E4%BA%8B%E5%8A%A1/"/>
     
   </entry>
   
@@ -211,6 +211,33 @@
       <category term="工厂" scheme="http://yoursite.com/tags/%E5%B7%A5%E5%8E%82/"/>
     
       <category term="OO" scheme="http://yoursite.com/tags/OO/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据库隔离级别</title>
+    <link href="http://yoursite.com/2017/11/26/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/"/>
+    <id>http://yoursite.com/2017/11/26/数据库隔离级别/</id>
+    <published>2017-11-26T08:29:12.000Z</published>
+    <updated>2018-02-26T08:30:14.333Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="READ-UNCOMMITTED-未提交读"><a href="#READ-UNCOMMITTED-未提交读" class="headerlink" title="READ UNCOMMITTED(未提交读)"></a>READ UNCOMMITTED(未提交读)</h1><p>事务中的修改，即使没有提交，对其他事务也都是可见的，即读取了一个未提交的修改（脏读）</p><h1 id="READ-COMMITTED-提交读"><a href="#READ-COMMITTED-提交读" class="headerlink" title="READ COMMITTED(提交读)"></a>READ COMMITTED(提交读)</h1><p>大多数数据库的默认隔离级别(mysql不是)，满足ACID中的隔离性定义：一个事务开始时，只能看见已经提交的事务所做的修改。有点不能理解，在网上看到了一个例子：</p><p>singo拿着工资卡去消费，系统读取到卡里确实有2000元，而此时她的老婆也正好在网上转账，把singo工资卡的2000元转到另一账户，并在 singo之前提交了事务，当singo扣款时，系统检查到singo的工资卡已经没有钱，扣款失败，singo十分纳闷，明明卡里有钱，为 何……</p><p>出现上述情况，即我们所说的不可重复读 ，两个并发的事务，“事务A：singo消费”、“事务B：singo的老婆网上转账”，事务A事先读取了数据，事务B紧接了更新了数据，并提交了事务，而事务A再次读取该数据时，数据已经发生了改变。</p><p>这里事务A两次读取到的数据都是已经提交的，不管是首次读取的2000，还是在B事务提交之后读取到的0，所以这个级别有时候也叫不可重复读。</p><p>当隔离级别设置为Read committed 时，避免了脏读，但是可能会造成不可重复读。</p><h1 id="REPEATABLE-READ-可重复度，-mysql默认级别"><a href="#REPEATABLE-READ-可重复度，-mysql默认级别" class="headerlink" title="REPEATABLE READ(可重复度， mysql默认级别)"></a>REPEATABLE READ(可重复度， mysql默认级别)</h1><p>该级别保证同一个事务多次读取的结果是一致的，在同一个事务里，SELECT的结果是事务开始时时间点的状态，因此，同样的SELECT操作读到的结果会是一致的。用上面的例子说就是当singo拿着工资卡去消费时，一旦系统开始读取工资卡信息（即事务开始），singo的老婆就不可能对该记录进行修改，也就是singo的老婆不能在此时转账。但是这个级别会产生幻读，所谓幻读，指的是当某个事务在读取某个范围内的记录时，另一个事务又在该范围内插入新纪录，当前事务再次读取该范围的记录时会产生幻行。</p><h2 id="幻读和不可重复读的区别"><a href="#幻读和不可重复读的区别" class="headerlink" title="幻读和不可重复读的区别"></a>幻读和不可重复读的区别</h2><p>幻读是指当事务不是独立执行时发生的一种现象，例如第一个事务对一个表中的数据进行了修改，这种修改涉及到表中的全部数据行。同时，第二个事务也修改这个表中的数据，这种修改是向表中插入一行新数据。那么，以后就会发生操作第一个事务的用户发现表中还有没有修改的数据行，就好象<br>发生了幻觉一样。</p><p>不可重复读强调的是对同一个数据的修改得到两个不同的结果，幻读强调的是对结果集的插入或删除操作，产生了新的结果集。</p><h1 id="Serializable-序列化"><a href="#Serializable-序列化" class="headerlink" title="Serializable (序列化)"></a>Serializable (序列化)</h1><p>Serializable 是最高的事务隔离级别，强制事务串行执行，简单来说就是读取的每一行数据都加锁，同时代价也花费最高，性能很低，一般很少使用，在该级别下，事务顺序执行，不仅可以避免脏读、不可重复读，还避免了幻像读。</p><p>√: 可能出现    ×: 不会出现</p><table><thead><tr><th>隔离级别</th><th>脏读</th><th>不可重复读</th><th>幻读</th><th>加锁读</th></tr></thead><tbody><tr><td>Read uncommitted</td><td>√</td><td>√</td><td>√</td><td>×</td></tr><tr><td>Read committed</td><td>×</td><td>√</td><td>√</td><td>×</td></tr><tr><td>Repeatable read</td><td>×</td><td>×</td><td>√</td><td>×</td></tr><tr><td>Serializable</td><td>×</td><td>×</td><td>×</td><td>√</td></tr></tbody></table>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;READ-UNCOMMITTED-未提交读&quot;&gt;&lt;a href=&quot;#READ-UNCOMMITTED-未提交读&quot; class=&quot;headerlink&quot; title=&quot;READ UNCOMMITTED(未提交读)&quot;&gt;&lt;/a&gt;READ UNCOMMITTED(未提交读)
+      
+    
+    </summary>
+    
+      <category term="数据库" scheme="http://yoursite.com/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+    
+      <category term="事务" scheme="http://yoursite.com/tags/%E4%BA%8B%E5%8A%A1/"/>
+    
+      <category term="mysql" scheme="http://yoursite.com/tags/mysql/"/>
     
   </entry>
   
