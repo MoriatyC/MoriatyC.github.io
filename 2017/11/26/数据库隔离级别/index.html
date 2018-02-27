@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Be Better">
 <meta property="og:description" content="READ UNCOMMITTED(未提交读)事务中的修改，即使没有提交，对其他事务也都是可见的，即读取了一个未提交的修改（脏读） READ COMMITTED(提交读)大多数数据库的默认隔离级别(mysql不是)，满足ACID中的隔离性定义：一个事务开始时，只能看见已经提交的事务所做的修改。有点不能理解，在网上看到了一个例子： singo拿着工资卡去消费，系统读取到卡里确实有2000元，而此时她的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-02-26T08:30:14.333Z">
+<meta property="og:updated_time" content="2018-02-26T13:04:17.686Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="数据库隔离级别">
 <meta name="twitter:description" content="READ UNCOMMITTED(未提交读)事务中的修改，即使没有提交，对其他事务也都是可见的，即读取了一个未提交的修改（脏读） READ COMMITTED(提交读)大多数数据库的默认隔离级别(mysql不是)，满足ACID中的隔离性定义：一个事务开始时，只能看见已经提交的事务所做的修改。有点不能理解，在网上看到了一个例子： singo拿着工资卡去消费，系统读取到卡里确实有2000元，而此时她的">
@@ -459,6 +459,7 @@
 </tr>
 </tbody>
 </table>
+<h2 id="最后提一句"><a href="#最后提一句" class="headerlink" title="最后提一句"></a>最后提一句</h2><p>InnoDB采用两阶段锁协议，只有在commit和rollback的时候才会释放锁并且是同一时间释放，并且这里说的锁都是隐式加锁，InnoDB会根据隔离级别在需要的时候自动加锁。</p>
 
       
     </div>
@@ -501,8 +502,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/13/工厂模式/" rel="prev" title="工厂模式">
-                工厂模式 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/11/27/数据库索引/" rel="prev" title="数据库索引">
+                数据库索引 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -591,7 +592,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -612,8 +613,8 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/pages/index.html">
-                  <span class="site-state-item-count">13</span>
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -646,7 +647,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-UNCOMMITTED-未提交读"><span class="nav-number">1.</span> <span class="nav-text">READ UNCOMMITTED(未提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-COMMITTED-提交读"><span class="nav-number">2.</span> <span class="nav-text">READ COMMITTED(提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#REPEATABLE-READ-可重复度，-mysql默认级别"><span class="nav-number">3.</span> <span class="nav-text">REPEATABLE READ(可重复度， mysql默认级别)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#幻读和不可重复读的区别"><span class="nav-number">3.1.</span> <span class="nav-text">幻读和不可重复读的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Serializable-序列化"><span class="nav-number">4.</span> <span class="nav-text">Serializable (序列化)</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-UNCOMMITTED-未提交读"><span class="nav-number">1.</span> <span class="nav-text">READ UNCOMMITTED(未提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-COMMITTED-提交读"><span class="nav-number">2.</span> <span class="nav-text">READ COMMITTED(提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#REPEATABLE-READ-可重复度，-mysql默认级别"><span class="nav-number">3.</span> <span class="nav-text">REPEATABLE READ(可重复度， mysql默认级别)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#幻读和不可重复读的区别"><span class="nav-number">3.1.</span> <span class="nav-text">幻读和不可重复读的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Serializable-序列化"><span class="nav-number">4.</span> <span class="nav-text">Serializable (序列化)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#最后提一句"><span class="nav-number">4.1.</span> <span class="nav-text">最后提一句</span></a></li></ol></li></ol></div>
             
 
           </div>
