@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="redis,nosql,持久化,事务," />
+  <meta name="keywords" content="redis,事务,nosql,持久化," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="一.持久化1. 快照： 将存在于某一时刻的所有数据都写入硬盘里面方法： 客户端通过向redis发送bgsave命令（创建子进程） 客户端通过向redis发送save命令，但是会阻塞其他命令，所以只有内存不够，或者不怕阻塞的时候才可以用。但是不要创建子进程，不会导致redis停顿，并且由于没有子进程抢资源所以比bgsave快。 设置了save选项：比如 save 60 10000，表示从最近一次创建">
-<meta name="keywords" content="redis,nosql,持久化,事务">
+<meta name="keywords" content="redis,事务,nosql,持久化">
 <meta property="og:type" content="article">
 <meta property="og:title" content="redis数据安全与性能保障">
 <meta property="og:url" content="http://yoursite.com/2018/01/29/redis数据安全与性能保障/index.html">
@@ -552,11 +552,11 @@
           
             <a href="/tags/redis/" rel="tag"># redis</a>
           
+            <a href="/tags/事务/" rel="tag"># 事务</a>
+          
             <a href="/tags/nosql/" rel="tag"># nosql</a>
           
             <a href="/tags/持久化/" rel="tag"># 持久化</a>
-          
-            <a href="/tags/事务/" rel="tag"># 事务</a>
           
         </div>
       
@@ -690,7 +690,7 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
+                <a href="/pages/index.html">
                   <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">标签</span>
                 </a>

@@ -87,15 +87,15 @@
 <meta property="og:site_name" content="Be Better">
 <meta property="og:description" content="索引在存储引擎层实现，所以我们先介绍一下不同的数据库引擎。 一.数据库引擎的类型1. InnoDBMySQL的默认事务型引擎，使用mvcc来支持高并发，实现了四个标准的隔离级别，默认级别是rr，通过间隙锁策略防止幻读。 InnoDB表基于聚簇索引建立的，数据存储在表空间中，可以将每个表的数据和索引存放在单独的文件中，支持热备份，其他的引擎都不支持。他的索引结构和其他存储引擎有很大不同，他的二级索引">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu1.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu2.jpg">
-<meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/duibi.jpg">
-<meta property="og:updated_time" content="2018-02-27T02:51:15.905Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/duibi.png">
+<meta property="og:updated_time" content="2018-02-27T02:54:42.793Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="数据库索引">
 <meta name="twitter:description" content="索引在存储引擎层实现，所以我们先介绍一下不同的数据库引擎。 一.数据库引擎的类型1. InnoDBMySQL的默认事务型引擎，使用mvcc来支持高并发，实现了四个标准的隔离级别，默认级别是rr，通过间隙锁策略防止幻读。 InnoDB表基于聚簇索引建立的，数据存储在表空间中，可以将每个表的数据和索引存放在单独的文件中，支持热备份，其他的引擎都不支持。他的索引结构和其他存储引擎有很大不同，他的二级索引">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.jpg">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.png">
 
 
 
@@ -456,7 +456,7 @@
 <li>访问哈希索引的数据很快，除非有很多冲突，冲突多的时候维护代价很大</li>
 </ul>
 <h2 id="3-空间数据索引-R-Tree"><a href="#3-空间数据索引-R-Tree" class="headerlink" title="3.空间数据索引(R_Tree)"></a>3.空间数据索引(R_Tree)</h2><h2 id="4-全文索引"><a href="#4-全文索引" class="headerlink" title="4. 全文索引"></a>4. 全文索引</h2><h2 id="InnoDB和MyISAM中B-Tree实现区别"><a href="#InnoDB和MyISAM中B-Tree实现区别" class="headerlink" title="InnoDB和MyISAM中B-Tree实现区别"></a>InnoDB和MyISAM中B-Tree实现区别</h2><h4 id="聚簇索引和非聚簇索引"><a href="#聚簇索引和非聚簇索引" class="headerlink" title="聚簇索引和非聚簇索引"></a>聚簇索引和非聚簇索引</h4><p>聚簇索引的顺序就是数据的物理存储顺序，而对非聚簇索引的索引顺序与数据物理排列顺序无关其实就是一个存储的是具体数据，一个存储了物理地址。正是聚簇索引的顺序就是数据的物理存储顺序，所以一个表最多只能有一个聚簇索引，因为物理存储只能有一个顺序。</p>
-<h5 id="InnoDB和MyISAM的数据分布对比"><a href="#InnoDB和MyISAM的数据分布对比" class="headerlink" title="InnoDB和MyISAM的数据分布对比"></a>InnoDB和MyISAM的数据分布对比</h5><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.jpg" alt="聚簇索引"><br>聚簇索引(Inno)<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu1.jpg" alt=""><br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu2.jpg" alt=""><br>非聚簇索引(MyISAM)<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/duibi.jpg" alt=""><br>对比图</p>
+<h5 id="InnoDB和MyISAM的数据分布对比"><a href="#InnoDB和MyISAM的数据分布对比" class="headerlink" title="InnoDB和MyISAM的数据分布对比"></a>InnoDB和MyISAM的数据分布对比</h5><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.png" alt="聚簇索引"><br>聚簇索引(Inno)<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu1.jpg" alt=""><br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu2.jpg" alt=""><br>非聚簇索引(MyISAM)<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/duibi.png" alt=""><br>对比图</p>
 <p>总结：</p>
 <ol>
 <li>InnoDB是聚簇索引，通过主键引用被索引的值，数据文件和索引文件在一起，MyISAM是非聚簇索引，通过物理地址索引被索引的值，数据文件和索引文件在两个文件中</li>
@@ -614,7 +614,7 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
+                <a href="/pages/index.html">
                   <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">标签</span>
                 </a>

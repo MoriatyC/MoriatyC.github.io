@@ -46,9 +46,9 @@
       </categories>
       <tags>
         <tag>redis</tag>
+        <tag>事务</tag>
         <tag>nosql</tag>
         <tag>持久化</tag>
-        <tag>事务</tag>
       </tags>
   </entry>
   <entry>
