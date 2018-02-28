@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Be Better">
 <meta property="og:description" content="READ UNCOMMITTED(未提交读)事务中的修改，即使没有提交，对其他事务也都是可见的，即读取了一个未提交的修改（脏读） READ COMMITTED(提交读)大多数数据库的默认隔离级别(mysql不是)，满足ACID中的隔离性定义：一个事务开始时，只能看见已经提交的事务所做的修改。有点不能理解，在网上看到了一个例子： singo拿着工资卡去消费，系统读取到卡里确实有2000元，而此时她的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-02-26T13:04:17.686Z">
+<meta property="og:updated_time" content="2018-02-28T02:09:23.652Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="数据库隔离级别">
 <meta name="twitter:description" content="READ UNCOMMITTED(未提交读)事务中的修改，即使没有提交，对其他事务也都是可见的，即读取了一个未提交的修改（脏读） READ COMMITTED(提交读)大多数数据库的默认隔离级别(mysql不是)，满足ACID中的隔离性定义：一个事务开始时，只能看见已经提交的事务所做的修改。有点不能理解，在网上看到了一个例子： singo拿着工资卡去消费，系统读取到卡里确实有2000元，而此时她的">
@@ -417,6 +417,10 @@
 <h2 id="幻读和不可重复读的区别"><a href="#幻读和不可重复读的区别" class="headerlink" title="幻读和不可重复读的区别"></a>幻读和不可重复读的区别</h2><p>幻读是指当事务不是独立执行时发生的一种现象，例如第一个事务对一个表中的数据进行了修改，这种修改涉及到表中的全部数据行。同时，第二个事务也修改这个表中的数据，这种修改是向表中插入一行新数据。那么，以后就会发生操作第一个事务的用户发现表中还有没有修改的数据行，就好象<br>发生了幻觉一样。</p>
 <p>不可重复读强调的是对同一个数据的修改得到两个不同的结果，幻读强调的是对结果集的插入或删除操作，产生了新的结果集。</p>
 <h1 id="Serializable-序列化"><a href="#Serializable-序列化" class="headerlink" title="Serializable (序列化)"></a>Serializable (序列化)</h1><p>Serializable 是最高的事务隔离级别，强制事务串行执行，简单来说就是读取的每一行数据都加锁，同时代价也花费最高，性能很低，一般很少使用，在该级别下，事务顺序执行，不仅可以避免脏读、不可重复读，还避免了幻像读。</p>
+<h2 id="间隙锁（Next-Key锁）"><a href="#间隙锁（Next-Key锁）" class="headerlink" title="间隙锁（Next-Key锁）"></a>间隙锁（Next-Key锁）</h2><p>当我们用范围条件而不是相等条件检索数据，并请求共享或排他锁时，InnoDB会给符合条件的已有数据记录的索引项加锁；对于键值在条件范围内但并不存在的记录，叫做“间隙（GAP)”，InnoDB也会对这个“间隙”加锁，这种锁机制就是所谓的间隙锁（Next-Key锁）,另外一方面，是为了满足其恢复和复制的需要。</p>
+<p>举例来说，假如emp表中只有101条记录，其empid的值分别是 1,2,…,100,101，下面的SQL：</p>
+<p>Select * from  emp where empid &gt; 100 for update;<br>是一个范围条件的检索，InnoDB不仅会对符合条件的empid值为101的记录加锁，也会对empid大于101（这些记录并不存在）的“间隙”加锁。</p>
+<p>InnoDB使用间隙锁的目的，一方面是为了防止幻读，以满足相关隔离级别的要求，</p>
 <p>√: 可能出现    ×: 不会出现</p>
 <table>
 <thead>
@@ -592,7 +596,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -603,7 +607,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -613,8 +617,8 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/pages/index.html">
-                  <span class="site-state-item-count">14</span>
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -647,7 +651,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-UNCOMMITTED-未提交读"><span class="nav-number">1.</span> <span class="nav-text">READ UNCOMMITTED(未提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-COMMITTED-提交读"><span class="nav-number">2.</span> <span class="nav-text">READ COMMITTED(提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#REPEATABLE-READ-可重复度，-mysql默认级别"><span class="nav-number">3.</span> <span class="nav-text">REPEATABLE READ(可重复度， mysql默认级别)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#幻读和不可重复读的区别"><span class="nav-number">3.1.</span> <span class="nav-text">幻读和不可重复读的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Serializable-序列化"><span class="nav-number">4.</span> <span class="nav-text">Serializable (序列化)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#最后提一句"><span class="nav-number">4.1.</span> <span class="nav-text">最后提一句</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-UNCOMMITTED-未提交读"><span class="nav-number">1.</span> <span class="nav-text">READ UNCOMMITTED(未提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#READ-COMMITTED-提交读"><span class="nav-number">2.</span> <span class="nav-text">READ COMMITTED(提交读)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#REPEATABLE-READ-可重复度，-mysql默认级别"><span class="nav-number">3.</span> <span class="nav-text">REPEATABLE READ(可重复度， mysql默认级别)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#幻读和不可重复读的区别"><span class="nav-number">3.1.</span> <span class="nav-text">幻读和不可重复读的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Serializable-序列化"><span class="nav-number">4.</span> <span class="nav-text">Serializable (序列化)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#间隙锁（Next-Key锁）"><span class="nav-number">4.1.</span> <span class="nav-text">间隙锁（Next-Key锁）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后提一句"><span class="nav-number">4.2.</span> <span class="nav-text">最后提一句</span></a></li></ol></li></ol></div>
             
 
           </div>

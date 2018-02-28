@@ -306,6 +306,239 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/28/AOP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MoriatyC">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Be Better">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/28/AOP/" itemprop="url">AOP</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-28T19:17:54+08:00">
+                2018-02-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/" itemprop="url" rel="index">
+                    <span itemprop="name">spring</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/02/28/AOP/" class="leancloud_visitors" data-flag-title="AOP">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h2><p>AOP（Aspect Oriented Programming），即面向切面编程，可以说是OOP（Object Oriented Programming，面向对象编程）的补充和完善。OOP引入封装、继承、多态等概念来建立一种对象层次结构，用于模拟公共行为的一个集合。不过OOP允许开发者定义纵向的关系，但并不适合定义横向的关系，例如日志功能。日志代码往往横向地散布在所有对象层次中，而与它对应的对象的核心功能毫无关系对于其他类型的代码，如安全性、异常处理和透明的持续性也都是如此，这种散布在各处的无关的代码被称为横切（cross cutting），在OOP设计中，它导致了大量代码的重复，而不利于各个模块的重用。</p>
+<p>AOP技术恰恰相反，它利用一种称为”横切”的技术，剖解开封装的对象内部，并将那些影响了多个类的公共行为封装到一个可重用模块，并将其命名为”Aspect”，即切面。所谓”切面”，简单说就是那些与业务无关，却为业务模块所共同调用的逻辑或责任封装起来，便于减少系统的重复代码，降低模块之间的耦合度，并有利于未来的可操作性和可维护性。</p>
+<p>使用”横切”技术，AOP把软件系统分为两个部分：<strong>核心关注点</strong>和<strong>横切关注点</strong>。业务处理的主要流程是核心关注点，与之关系不大的部分是横切关注点。横切关注点的一个特点是，他们经常发生在核心关注点的多处，而各处基本相似，比如权限认证、日志、事物。AOP的作用在于分离系统中的各种关注点，将核心关注点和横切关注点分离开来。</p>
+<h2 id="一-术语"><a href="#一-术语" class="headerlink" title="一.术语"></a>一.术语</h2><h3 id="1-横切关注点"><a href="#1-横切关注点" class="headerlink" title="1.横切关注点"></a>1.横切关注点</h3><p>软件开发中，散布于应用中多处的功能被称为横切关注点，如事务、日志、安全。</p>
+<h3 id="2-advice-通知）-what-when"><a href="#2-advice-通知）-what-when" class="headerlink" title="2.advice(通知） what  when"></a>2.advice(通知） what  when</h3><p>切面的工作被称为通知，他定义了切面的工作是什么和何时工作  </p>
+<h4 id="5种类型通知"><a href="#5种类型通知" class="headerlink" title="5种类型通知:"></a>5种类型通知:</h4><ol>
+<li>前置通知before</li>
+<li>后置通知after(不关心方法的输出是什么)</li>
+<li>返回通知after-returning(方法成功执行)</li>
+<li>异常通知after-throwing(方法返回异常)</li>
+<li>环绕通知around(包裹被通知方法，之前和之后都自定义行为)</li>
+</ol>
+<h3 id="3-join-point连接点"><a href="#3-join-point连接点" class="headerlink" title="3.join point连接点"></a>3.join point连接点</h3><p>应用执行过程中，能够插入切面的所有“点”（时机），使用通知的时机，即触发通知的事件方法</p>
+<h3 id="4-poincut-切点-where"><a href="#4-poincut-切点-where" class="headerlink" title="4.poincut 切点 where"></a>4.poincut 切点 where</h3><p>如果说通知定义切面的“什么”和“何时”，那么切点就定义了“何处”。切点的定义会匹配通知所要织入的一个或多个连接点。我们通常会使用明确的类和方法名称来指定这些切点，或是利用正则表达式定义匹配的类和方法名称模式来指定这些切点。</p>
+<h3 id="5-切面aspect-advice-poincut"><a href="#5-切面aspect-advice-poincut" class="headerlink" title="5.切面aspect = advice + poincut"></a>5.切面aspect = advice + poincut</h3><p>切面是通知和切点的结合，通知和切点共同定义了关于切面的全部内容—-它是什么，在何时和何处完成其功能</p>
+<p> 通过  <strong>代理</strong>  来实现切面，代理类包裹了目标bean，先拦截对被通知方法的调用，再转发给真正的bean，在调用bean之前，先执行切面逻辑。直到需要被代理的bean时，才创建代理对象。正因为spring会在运行时才创建代理对象，所以不需要特殊的编译器织入springAOP切面。</p>
+<h4 id="定义切面"><a href="#定义切面" class="headerlink" title="定义切面"></a>定义切面</h4><p>@AspectJ ：表明该类不仅是一个pojo还是以个切面</p>
+<p>@Pointcut 在一个@Aspect切面内定义可重用的切点</p>
+<p>@Pointcut（“execution（<strong> concert.Performance.perform(..))”)<br>public void performance() {}<br>将切点依附于performance（）方法，可以在定义切点表达式的时候用performance（）代替execution（</strong> concert.Performance.perform(..))</p>
+<ul>
+<li>环绕通知<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Audience</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Pointcut</span>(<span class="string">"excution(** concert.Performance.perform(..))"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">performance</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Around</span>(<span class="string">"performance()"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">watchPerformance</span><span class="params">(ProceedingJoinPoint jp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">"Silencing cell phones"</span>);</span><br><span class="line">            System.out.pringln(<span class="string">"Taking seats"</span>);</span><br><span class="line">            jp.proceed():</span><br><span class="line">            Sytem.out.println(<span class="string">"CLAP CLAP CLAP!!!"</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (THrowable e) &#123;</span><br><span class="line">            SYstem.out.println(<span class="string">"Demanding a refund"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>如果不调用proceed（）方法，那么会阻塞被通知方法的调用。<br>可以不调用proceed（）方法，也可以多次调用proceed（）方法，这样的场景就是实现重试逻辑，也就是在被通知方法失败后，进行重复尝试。</p>
+<ul>
+<li>切点拦截参数<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Pointcut</span>(<span class="string">"excution(** concert.Performance.perform(..)) &amp;&amp; args(trackNumber"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">trackPlayed</span><span class="params">(<span class="keyword">int</span> trackNumber)</span> </span>&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Before</span>(<span class="string">"trackPlayed(trackNumber)"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">countTrack</span><span class="params">(<span class="keyword">int</span> trackNumber)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> currentCount = getPlayCount(trackNumber);</span><br><span class="line">        trackCounts.put(trackNumber, currentCount + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPlayCount</span><span class="params">(<span class="keyword">int</span> trackNumber)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> trackCounts.containsKey(trackNumber) ? trackCounts.get(trackNumber) : <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>切点定义中的参数与切点方法中的参数名一样就可以实现从命名切点到通知方法的参数转移。</p>
+<h3 id="6-Introduction引入"><a href="#6-Introduction引入" class="headerlink" title="6.Introduction引入"></a>6.Introduction引入</h3><p>向现有的类添加新方法和属性。</p>
+<p>给bean添加一个新的功能，需要一个引入代理去实现相关的功能。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Aspect</span> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EncoreableIntroducer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@DeclareParents</span>(value=<span class="string">"concert.Performance+"</span>, defualtImpl=DefaultEncoreable.class)</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Encoreable ecoreable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>value指定了哪种类型的bean要引入该接口。在这里是所有实现Performance的类型。加号表示Performance的所有子类而不是本身</li>
+<li>defaultImplement指定了为引入功能提供实现的类       <strong>实现类</strong></li>
+<li>@DeclareParents注解所标注的静态属性指明了要 <strong>引入的接口</strong>。</li>
+</ul>
+<h3 id="7-织入"><a href="#7-织入" class="headerlink" title="7.织入"></a>7.织入</h3><p>把切面应用到目标对象并创建新的代理对象的过程。在目标生命周期有多个点可以进行织入：</p>
+<ul>
+<li>编译期</li>
+<li>类加载期</li>
+<li>运行期</li>
+</ul>
+<h2 id="二-spring对AOP的支持"><a href="#二-spring对AOP的支持" class="headerlink" title="二.spring对AOP的支持"></a>二.spring对AOP的支持</h2><p>Spring默认采取的动态代理机制实现AOP，当动态代理不可用时（代理类无接口）会使用CGlib机制。但Spring的AOP有一定的缺点，第一个只能对方法进行切入，不能对接口，字段，静态代码块进行切入（切入接口的某个方法，则该接口下所有实现类的该方法将被切入）。第二个同类中的互相调用方法将不会使用代理类。因为要使用代理类必须从Spring容器中获取Bean。第三个性能不是最好的</p>
+<ul>
+<li>基于代理的经典SpringAOP</li>
+<li>纯POJO切面</li>
+<li>@AspectJ注解驱动的切面</li>
+<li>注入式AspectJ切面</li>
+</ul>
+<p><strong>由于Spring AOP构建在动态代理基础之上，所以其对AOP的支持局限于方法拦截。他不支持字段连接点和构造器连接点。</strong></p>
+<p>直到应用需要被代理的bean时，spring才会创建代理对象。如果使用的是ApplicationContext的话，在ApplicationContext从BeanFactory中加载所有bean的时候，Spring才会创建被dialing的对象。</p>
+<h3 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h3><p>不修改原来的对象就能增加一系列新的功能</p>
+<ol>
+<li>jdk自带动态代理</li>
+</ol>
+<p>Java在JDK1.3后引入的动态代理机制，使我们可以在<strong>运行期</strong>,目标类加载后动态的创建代理类</p>
+<ol>
+<li><p>CGlib</p>
+<p>使用动态字节码生成技术实现AOP原理是在运行期间目标字节码加载后，生成目标类的子类，将切面逻辑加入到子类中，所以使用Cglib实现AOP不需要基于接口。</p>
+</li>
+</ol>
+<h4 id="JDK中动态代理实现流程"><a href="#JDK中动态代理实现流程" class="headerlink" title="JDK中动态代理实现流程"></a>JDK中动态代理实现流程</h4><p>在java的动态代理机制中，有两个重要的类和接口，一个是 InvocationHandler(Interface)、另一个则是 Proxy(Class)，这一个类和接口是实现我们动态代理所必须用到的。</p>
+<p>使用方法：</p>
+<ol>
+<li>创建调用处理器（InvocationHandler)，在其中传入被代理对象</li>
+<li>在调用处理器的invoke方法中加入代理逻辑，并调用被代理对象的被代理方法</li>
+<li>通过<strong>Proxy.newProxyInstance</strong>方法获得代理对象</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DynamicProxyHandler</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> Object proxied;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">DynamicProxyHandler</span><span class="params">(Object proxied)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.proxied = proxied;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> Object</span><br><span class="line">  invoke(Object proxy, Method method, Object[] args)</span><br><span class="line">  <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">    System.out.println(<span class="string">"**** proxy: "</span> + proxy.getClass() +</span><br><span class="line">      <span class="string">", method: "</span> + method + <span class="string">", args: "</span> + args);</span><br><span class="line">    <span class="keyword">if</span>(args != <span class="keyword">null</span>)</span><br><span class="line">      <span class="keyword">for</span>(Object arg : args)</span><br><span class="line">        System.out.println(<span class="string">"  "</span> + arg);</span><br><span class="line">    <span class="keyword">return</span> method.invoke(proxied, args);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleDynamicProxy</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">consumer</span><span class="params">(Interface iface)</span> </span>&#123;</span><br><span class="line">    iface.doSomething();</span><br><span class="line">    iface.somethingElse(<span class="string">"bonobo"</span>);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    RealObject real = <span class="keyword">new</span> RealObject();</span><br><span class="line">   </span><br><span class="line">    Interface proxy = (Interface)Proxy.newProxyInstance(</span><br><span class="line">      Interface.class.getClassLoader(),</span><br><span class="line">      <span class="keyword">new</span> Class[]&#123; Interface.class &#125;,</span><br><span class="line">      <span class="keyword">new</span> DynamicProxyHandler(real));</span><br><span class="line">    consumer(proxy)；</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>Proxy.newProxyInstance方法有三个参数，分别是类加载器，一个希望该代理实现的接口列表以及他的被代理对象。</p>
+<p>通过 Proxy.newProxyInstance创建的代理对象是在jvm运行时动态生成的一个对象，它并不是我们的InvocationHandler类型，也不是我们定义的那组接口的类型，而是在运行是动态生成的一个对象，并且命名方式都是这样的形式，以$开头，proxy为中，最后一个数字表示对象的标号。</p>
+<p>总体逻辑大概是：通过InvocationHandler来包装被代理的方法，再根据（InvocationHandler）和需要代理的接口生成相应的代理对象，通过将相应的调用转发到代理对象，从而实现功能的包装。</p>
+<p>由于在<strong>Proxy.newProxyInstance</strong>中，所有的方法都是通过h.invoke()实现的，这样就让所有的接口方法都被包裹上代理逻辑，也就是说当执行被代理操作的时候在代理对象内部，实际上是使用invoke()方法将请求转发给了调用处理器进行操作。</p>
+<h4 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h4><p>既然说了动态代理，那我们就顺便提一下静态代理，虽然他没有动态代理那么好。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Subject</span>   </span></span><br><span class="line"><span class="class"></span>&#123;   </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span>;   </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">package</span> test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RealSubject</span> <span class="keyword">implements</span> <span class="title">Subject</span>   </span></span><br><span class="line"><span class="class"></span>&#123;   </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span>   </span></span><br><span class="line"><span class="function">  </span>&#123;   </span><br><span class="line">    System.out.println( <span class="string">"call doSomething()"</span> );   </span><br><span class="line">  &#125;   </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">package</span> test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SubjectProxy</span> <span class="keyword">implements</span> <span class="title">Subject</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">  Subject subimpl = <span class="keyword">new</span> RealSubject();</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">  <span class="comment">//可以在这里加入代理逻辑</span></span><br><span class="line">     subimpl.doSomething();</span><br><span class="line">     <span class="comment">//可以在这里加入代理逻辑</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">package</span> test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestProxy</span> </span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">       Subject sub = <span class="keyword">new</span> SubjectProxy();</span><br><span class="line">       sub.doSomething();</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>刚开始我会觉得SubjectProxy定义出来纯属多余，直接实例化实现类完成操作不就结了吗？后来随着业务庞大，你就会知道，实现proxy类对真实类的封装对于粒度的控制有着重要的意义。但是静态代理这个模式本身有个大问题，如果类方法数量越来越多的时候，代理类的代码量是十分庞大的。所以引入动态代理来解决此类问题。</p>
+<p>动态代理相对于静态的好处：</p>
+<ol>
+<li>Proxy类的代码量被固定下来，不会因为业务的逐渐庞大而庞大；</li>
+<li>可以实现AOP编程，实际上静态代理也可以实现，总的来说，AOP可以算作是代理模式的一个典型应用；</li>
+<li>解耦，通过参数就可以判断真实类，不需要事先实例化，更加灵活多变。<br>这也是为什么Spring这么受欢迎的一个原因，<br>Spring容器代替工厂，Spring AOP代替JDK动态代理，让面向切面编程更容易实现。<br>在Spring的帮助下轻松添加，移除动态代理，且对源代码无任何影响。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/24/HashMap源码解析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1963,7 +2196,10 @@
 <li>访问哈希索引的数据很快，除非有很多冲突，冲突多的时候维护代价很大</li>
 </ul>
 <h2 id="3-空间数据索引-R-Tree"><a href="#3-空间数据索引-R-Tree" class="headerlink" title="3.空间数据索引(R_Tree)"></a>3.空间数据索引(R_Tree)</h2><h2 id="4-全文索引"><a href="#4-全文索引" class="headerlink" title="4. 全文索引"></a>4. 全文索引</h2><h2 id="InnoDB和MyISAM中B-Tree实现区别"><a href="#InnoDB和MyISAM中B-Tree实现区别" class="headerlink" title="InnoDB和MyISAM中B-Tree实现区别"></a>InnoDB和MyISAM中B-Tree实现区别</h2><h4 id="聚簇索引和非聚簇索引"><a href="#聚簇索引和非聚簇索引" class="headerlink" title="聚簇索引和非聚簇索引"></a>聚簇索引和非聚簇索引</h4><p>聚簇索引的顺序就是数据的物理存储顺序，而对非聚簇索引的索引顺序与数据物理排列顺序无关其实就是一个存储的是具体数据，一个存储了物理地址。正是聚簇索引的顺序就是数据的物理存储顺序，所以一个表最多只能有一个聚簇索引，因为物理存储只能有一个顺序。</p>
-<h5 id="InnoDB和MyISAM的数据分布对比"><a href="#InnoDB和MyISAM的数据分布对比" class="headerlink" title="InnoDB和MyISAM的数据分布对比"></a>InnoDB和MyISAM的数据分布对比</h5><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.png" alt="聚簇索引"><br>聚簇索引(Inno)<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu1.jpg" alt=""><br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu2.jpg" alt=""><br>非聚簇索引(MyISAM)<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/duibi.png" alt=""><br>对比图</p>
+<h5 id="InnoDB和MyISAM的数据分布对比"><a href="#InnoDB和MyISAM的数据分布对比" class="headerlink" title="InnoDB和MyISAM的数据分布对比"></a>InnoDB和MyISAM的数据分布对比</h5><p>下面分别是聚簇索引和非聚簇索引的存储结构图</p>
+<p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jucu.png" alt="聚簇索引"></p>
+<p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu1.jpg" alt=""><br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/feijucu2.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/duibi.png" alt=""></p>
 <p>总结：</p>
 <ol>
 <li>InnoDB是聚簇索引，通过主键引用被索引的值，数据文件和索引文件在一起，MyISAM是非聚簇索引，通过物理地址索引被索引的值，数据文件和索引文件在两个文件中</li>
@@ -2132,6 +2368,10 @@
 <h2 id="幻读和不可重复读的区别"><a href="#幻读和不可重复读的区别" class="headerlink" title="幻读和不可重复读的区别"></a>幻读和不可重复读的区别</h2><p>幻读是指当事务不是独立执行时发生的一种现象，例如第一个事务对一个表中的数据进行了修改，这种修改涉及到表中的全部数据行。同时，第二个事务也修改这个表中的数据，这种修改是向表中插入一行新数据。那么，以后就会发生操作第一个事务的用户发现表中还有没有修改的数据行，就好象<br>发生了幻觉一样。</p>
 <p>不可重复读强调的是对同一个数据的修改得到两个不同的结果，幻读强调的是对结果集的插入或删除操作，产生了新的结果集。</p>
 <h1 id="Serializable-序列化"><a href="#Serializable-序列化" class="headerlink" title="Serializable (序列化)"></a>Serializable (序列化)</h1><p>Serializable 是最高的事务隔离级别，强制事务串行执行，简单来说就是读取的每一行数据都加锁，同时代价也花费最高，性能很低，一般很少使用，在该级别下，事务顺序执行，不仅可以避免脏读、不可重复读，还避免了幻像读。</p>
+<h2 id="间隙锁（Next-Key锁）"><a href="#间隙锁（Next-Key锁）" class="headerlink" title="间隙锁（Next-Key锁）"></a>间隙锁（Next-Key锁）</h2><p>当我们用范围条件而不是相等条件检索数据，并请求共享或排他锁时，InnoDB会给符合条件的已有数据记录的索引项加锁；对于键值在条件范围内但并不存在的记录，叫做“间隙（GAP)”，InnoDB也会对这个“间隙”加锁，这种锁机制就是所谓的间隙锁（Next-Key锁）,另外一方面，是为了满足其恢复和复制的需要。</p>
+<p>举例来说，假如emp表中只有101条记录，其empid的值分别是 1,2,…,100,101，下面的SQL：</p>
+<p>Select * from  emp where empid &gt; 100 for update;<br>是一个范围条件的检索，InnoDB不仅会对符合条件的empid值为101的记录加锁，也会对empid大于101（这些记录并不存在）的“间隙”加锁。</p>
+<p>InnoDB使用间隙锁的目的，一方面是为了防止幻读，以满足相关隔离级别的要求，</p>
 <p>√: 可能出现    ×: 不会出现</p>
 <table>
 <thead>
@@ -2210,176 +2450,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/23/为什么String是不可变对象(译)/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="MoriatyC">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Be Better">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/23/为什么String是不可变对象(译)/" itemprop="url">为什么String是不可变对象(译)</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-23T11:01:23+08:00">
-                2017-11-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/java/" itemprop="url" rel="index">
-                    <span itemprop="name">java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2017/11/23/为什么String是不可变对象(译)/" class="leancloud_visitors" data-flag-title="为什么String是不可变对象(译)">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>原文:<a href="http://www.programcreek.com/2013/04/why-string-is-immutable-in-java/" target="_blank" rel="noopener">Why String is immutable in Java ? </a></p>
-<p><strong>String</strong>是Java中的一个不可变类。所谓不可变，简单来说就是其对象不能被修改。实例中的所有信息在初始化的时候就已经具备，并且不能被修改。不可变类有很多优点。这篇文章简要说明了为什么String被设计为不可变类。关于其好的回答应该建立在对内存模型、同步和数据结构等的理解之上。</p>
-<h1 id="1-字符串池的需求"><a href="#1-字符串池的需求" class="headerlink" title="1. 字符串池的需求"></a>1. 字符串池的需求</h1><p>字符串池是一个位于方法区的特殊区域。当一个字符串被创建的时候，如果该字符串已经存在于字符串池中，那么直接返回该字符串的引用，而不是创建一个新的字符串。<br>下边的代码将只会创建一个字符串对象：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="string">"abcd"</span>;</span><br><span class="line">String s2 = <span class="string">"abcd"</span>;</span><br></pre></td></tr></table></figure></p>
-<p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/String.png" alt=""></p>
-<p>s1和s2都指向同一个字符串对象。<br>如果String不是不可变的，那么修改s1的字符串对象同样也会导致s2的内容发生变化。</p>
-<h1 id="2-缓存Hashcode"><a href="#2-缓存Hashcode" class="headerlink" title="2. 缓存Hashcode"></a>2. 缓存Hashcode</h1><p>字符串的hashcode在Java中经常被用到。例如，在一个HashMap中。其不可变性保证了hashcode（哈希值）总是保持不变，从而不用担心因hashcode变化导致的缓存问题。那就意味着，不用每次在其使用的时候计算其hashcode，从而更加高效。<br>在String类中，有如下代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> hash; <span class="comment">//用来缓存hash code</span></span><br></pre></td></tr></table></figure></p>
-<h1 id="3-简化其他对象的使用"><a href="#3-简化其他对象的使用" class="headerlink" title="3. 简化其他对象的使用"></a>3. 简化其他对象的使用</h1><p>为了理解这一点，请看下边的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();</span><br><span class="line">set.add(new String(&quot;a&quot;));</span><br><span class="line">set.add(new String(&quot;b&quot;));</span><br><span class="line">set.add(new String(&quot;c&quot;));</span><br><span class="line">for (String a : set)</span><br><span class="line">    a.value = &quot;a&quot;;</span><br></pre></td></tr></table></figure></p>
-<p>这个例子中，如果String是可变的，也就是说set中的值是可变的，这会影响到set的设计（set包含不重复的元素）。当然这个例子是有问题的，在String类中是不存在value这个属性的。（ps：个人觉得应该是没有可以直接访问的value，毕竟String中value数组是可以通过反射访问的，不知道，不知道这个老外是怎么个意思）</p>
-<h1 id="4-安全性"><a href="#4-安全性" class="headerlink" title="4.安全性"></a>4.安全性</h1><p>字符串在许多的java类中都用作参数，例如网络连接，打开文件等等。如果字符串是可变的，一个连接或文件就会被修改从而导致严重的错误。可变的字符串也会导致在使用反射时导致严重的问题，因为参数是字符串形式的。<br>举例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">connect</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!isSecure(s)) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> SecurityException();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果s内的值被修改，则会导致出现问题</span></span><br><span class="line">    doSomethind(s);    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>（虽然略牵强，但是也有一定道理）</p>
-<h1 id="5-不可变的对象本身就是线程安全的"><a href="#5-不可变的对象本身就是线程安全的" class="headerlink" title="5. 不可变的对象本身就是线程安全的"></a>5. 不可变的对象本身就是线程安全的</h1><p>不可变的对象，可以在多个线程间自由共享。从而免除了进行同步的麻烦。</p>
-<p>总之， String被设计为不可变的类，是出于性能和安全性的考虑，这也是其他所有不可变类应用的初衷。</p>
-<h1 id="6-引用"><a href="#6-引用" class="headerlink" title="6. 引用"></a>6. 引用</h1><blockquote>
-<p><a href="http://blog.csdn.net/get_set/article/details/49926511" target="_blank" rel="noopener">http://blog.csdn.net/get_set/article/details/49926511</a></p>
-</blockquote>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -2423,7 +2500,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2434,7 +2511,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -2444,8 +2521,8 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/pages/index.html">
-                  <span class="site-state-item-count">14</span>
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
