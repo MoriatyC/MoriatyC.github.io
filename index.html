@@ -348,6 +348,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/jvm/" itemprop="url" rel="index">
+                    <span itemprop="name">jvm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -388,7 +410,86 @@
       
         
           
-            
+            <h1 id="一、运行时数据区域"><a href="#一、运行时数据区域" class="headerlink" title="一、运行时数据区域"></a>一、运行时数据区域</h1><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jvm.jpg" alt=""></p>
+<h2 id="1-程序计数器（线程私有）"><a href="#1-程序计数器（线程私有）" class="headerlink" title="1. 程序计数器（线程私有）"></a>1. 程序计数器（线程私有）</h2><p>可以看做当前线程所执行的字节码的行号指示器，为了线程切换后能恢复到正确的执行位置，每条线程都需要一个独立的程序计数器，他们之间互不影响独立存储，若线程执行的是一个java方法，则记录的时候是正在执行的虚拟机字节码指令的地址；若执行的是native方法，则为空。</p>
+<h2 id="2-Java虚拟机栈（线程私有）"><a href="#2-Java虚拟机栈（线程私有）" class="headerlink" title="2. Java虚拟机栈（线程私有）"></a>2. Java虚拟机栈（线程私有）</h2><p>java方法执行的内存模型，方法在执行的时候都会创建一个栈帧（stack frame),方法从调用直至执行完成的过程，就对应一个栈帧在虚拟机栈中入栈到出栈的过程。马士兵说的栈就是这里的虚拟机栈，或者说是虚拟机栈中的局部变量表部分。</p>
+<p>局部变量表存放编译期可知的各种基本数据类型、对象引用和returnAddress类型。</p>
+<p>局部变量表的内存在编译器完成分配，运行期间不会改变局部变量表的大小。</p>
+<h2 id="3-本地方法栈"><a href="#3-本地方法栈" class="headerlink" title="3. 本地方法栈"></a>3. 本地方法栈</h2><p>作用同上，针对native房阿发</p>
+<h2 id="4-java堆（线程共享）"><a href="#4-java堆（线程共享）" class="headerlink" title="4. java堆（线程共享）"></a>4. java堆（线程共享）</h2><p>存放对象实例，所有的对象实例和数组都要在堆上分配。不需要连续的内存，可以选择固定大小或者可扩展</p>
+<h2 id="5-方法区non-heap（线程共享）"><a href="#5-方法区non-heap（线程共享）" class="headerlink" title="5. 方法区non-heap（线程共享）"></a>5. 方法区non-heap（线程共享）</h2><p>方法区是java堆的逻辑部分（可能因为都是线程共享的？），<strong>存储已经被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据</strong>。jvm规范将他归为堆的逻辑部分，但是他的别名叫Non-Heap。不需要连续的内存，可以选择固定大小或者可扩展</p>
+<h2 id="6-运行时常量池"><a href="#6-运行时常量池" class="headerlink" title="6. 运行时常量池"></a>6. 运行时常量池</h2><p><strong>是方法区的一部分</strong>，Class文件中也有常量池，用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。</p>
+<p>字面量：如文本字符串、声明为final的常量等</p>
+<p>符号引用：</p>
+<ol>
+<li>类和接口的全限定名 </li>
+<li>字段的名称和描述符 </li>
+<li>方法的名称和描述符</li>
+</ol>
+<p>运行时常量池还具有动态性，并非预置在Class文件中的常量池才能从编译器产生进入运行时常量池，运行期间也可以，String类的intern（）。</p>
+<h2 id="7-直接内存"><a href="#7-直接内存" class="headerlink" title="7. 直接内存"></a>7. 直接内存</h2><p>nio通过native函数库直接分配堆外内存，再通过一个存储在java堆中的directbytebuffer对象作为这块内存的引用进行操作，避免在java堆和native堆中来回复制数据从而提高性能。</p>
+<h1 id="二、对象的深入了解"><a href="#二、对象的深入了解" class="headerlink" title="二、对象的深入了解"></a>二、对象的深入了解</h1><h2 id="1-对象创建过程"><a href="#1-对象创建过程" class="headerlink" title="1. 对象创建过程"></a>1. 对象创建过程</h2><p>当遇到new指令之后</p>
+<ol>
+<li>类检查：检查是否是已解释的类（查符号引用），是否已经初始化（否则先执行类加载）</li>
+<li>分配内存：根据使用的GC机制使用不同的分配方法<ol>
+<li>堆中内存规整，使用“指针碰撞”（一边是空闲的，一边是使用的，通过指针移动划分）</li>
+<li>内存不规整，使用“空闲列表”（维护一个查询列表）</li>
+</ol>
+</li>
+<li>解决临界资源（内存）的问题<ol>
+<li>进行同步处理，CAS（乐观锁）+重试。CAS：通过3个值，内存值V，旧的预期值A，要修改的新值B。当且仅当预期值A和内存值V相同时，将内存值V修改为B，否则什么都不做。</li>
+<li>本地线程分配缓冲TLAB：每个线程在java堆中预先分配一小块内存。</li>
+</ol>
+</li>
+<li>内存分配完后将内存初始化为0，若使用TLAB则在TLAB分配时进行，这样保证对象的实例字段在为初始值的时候就可以直接使用。</li>
+<li>设置对象头 <strong>虚拟机的实例化完成</strong></li>
+</ol>
+<p>new指令后接着执行<init>方法按照程序员意愿进行初始化。</init></p>
+<h2 id="2-对象的内存布局"><a href="#2-对象的内存布局" class="headerlink" title="2. 对象的内存布局"></a>2. 对象的内存布局</h2><p><strong>对象分为对象头、实例数据、对齐填充</strong></p>
+<p>对象头： </p>
+<ol>
+<li>存储对象自身的运行时数据（哈希码，gc分代年龄，锁状态标志，线程持有的锁、偏向线程ID、偏向时间戳，会根据状态服用自己的存储空间。</li>
+<li>类型指针，指向类元数据的指针，确定这个对象是哪个类的实例，但是非必须。若为数组类型，还要记录数组长度。</li>
+</ol>
+<p>实例数据:程序代码中所定义的各种类型的字段。</p>
+<p>对齐补充: 因为对象大小是8字节的整数倍</p>
+<h2 id="3-对象的访问定位"><a href="#3-对象的访问定位" class="headerlink" title="3. 对象的访问定位"></a>3. 对象的访问定位</h2><p>java程序通过栈上的reference数据来操作堆上的具体对象，有2种主流实现方法</p>
+<ol>
+<li>句柄</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jvm2.jpg" alt=""><br> 会在堆中划分一个句柄池，reference中存储的就是句柄的地址，句柄包含了指向实例数据的指针和类型数据的指针（类描述信息）</p>
+<p> 优点：是存储了稳定的句柄地址，GC后对象移动后只要修改句柄中的实例数据指针就好，reference不用修改</p>
+<ol>
+<li>直接指针(HotSpot默认)</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/jvm3.jpg" alt=""></p>
+<p>reference存储的直接就是对象地址，对象中包括实例数据和存储类型数据的指针，优点是减少了一次指针定位的开销，加快了速度</p>
+<h2 id="4-内存异常实战"><a href="#4-内存异常实战" class="headerlink" title="4. 内存异常实战"></a>4. 内存异常实战</h2><p>首先明确两个概念，内存溢出和内存泄露。</p>
+<ol>
+<li><p>内存溢出 out of memory：是指程序在申请内存时，没有足够的内存空间供其使用，出现out of memory；比如申请了一个integer,但给它存了long才能存下的数，那就是内存溢出。</p>
+</li>
+<li><p>内存泄漏：指你向系统申请分配内存进行使用(new)，可是使用完了以后却不归还(delete)，结果你申请到的那块内存你自己也不能再访问（也许你把它的地址给弄丢了），而系统也不能再次将它分配给需要的程序。</p>
+</li>
+</ol>
+<p>比如各种连接没有close掉，在之前的版本中出现大量的字符串没有gc掉</p>
+<p>memory leak会最终会导致out of memory。</p>
+<h3 id="1-堆溢出"><a href="#1-堆溢出" class="headerlink" title="1. 堆溢出"></a>1. 堆溢出</h3><p>通过jvm args：</p>
+<p><strong>-XX:+HeapDumpOnOutOfMemoryError</strong> ：可以让虚拟机在出现内存溢出异常的时候dump当前的内存堆转储快照。通过Eclipse Memory Analyzer对文件进行分析。</p>
+<p><strong>-Xms20m</strong>：设置堆的最小内存值为20mb<br><strong>-Xmx20m</strong>：设置堆的最大内存值为20mb</p>
+<h3 id="2-栈溢出"><a href="#2-栈溢出" class="headerlink" title="2. 栈溢出"></a>2. 栈溢出</h3><p><strong>-Xss</strong>设置栈内存</p>
+<p>由于os分配给进程内存是有限制的，比如32位的windows是2gb，而jvm提供参数控制堆和方法区的最大值，所以剩余内存为2gb-Xmx-最大方法区容量，程序计数器可以忽略不计，所以若jvm的也忽略不计，那剩下的内存就由本地方法栈和虚拟机栈瓜分。<br>如果建立过多线程导致内存溢出，在不能减少线程数或更换高位虚拟机的情况下只能通过减少最大堆和栈容量来换取更多的线程。</p>
+<h3 id="3-1-方法区和运行时常量池溢出"><a href="#3-1-方法区和运行时常量池溢出" class="headerlink" title="3.1 方法区和运行时常量池溢出"></a>3.1 方法区和运行时常量池溢出</h3><p>String.intern()是一个Native方法，如果字符串常量池中包含等于此String对象的字符串，则返回代表池中这个字符串的String对象，否则将String对象包含的字符串添加到常量池中并且返回这个字符串的String对象。这里推荐一篇介绍JDK6和JDK7中String.inter()区别的帖子<a href="https://tech.meituan.com/in_depth_understanding_string_intern.html/" target="_blank" rel="noopener">https://tech.meituan.com/in_depth_understanding_string_intern.html/</a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * VM Args：-XX:PermSize=10M -XX:MaxPermSize=10M</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> zzm</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RuntimeConstantPoolOOM</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 使用List保持着常量池引用，避免Full GC回收常量池行为</span></span><br><span class="line">		List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">		<span class="comment">// 10MB的PermSize在integer范围内足够产生OOM了</span></span><br><span class="line">		<span class="keyword">int</span> i = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">			list.add(String.valueOf(i++).intern());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这段代码在1.6中会因为常量池溢出，而在1.7中会继续执行，就是因为去永久代，具体细节稍后会详细讨论。</p>
+<p>一个有意思的例子<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RuntimeConstantPoolOOM</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		String str1 = <span class="keyword">new</span> StringBuilder(<span class="string">"中国"</span>).append(<span class="string">"钓鱼岛"</span>).toString();</span><br><span class="line">		System.out.println(str1.intern() == str1);</span><br><span class="line">		</span><br><span class="line">		String str2 = <span class="keyword">new</span> StringBuilder(<span class="string">"ja"</span>).append(<span class="string">"va"</span>).toString();</span><br><span class="line">		System.out.println(str2.intern() == str2);</span><br><span class="line">	&#125;	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在1.6中会出现2个false；在1.7中会得到一个true一个false；</p>
+<p>这里有2个问题：</p>
+<ol>
+<li>在1.6中intern（）会把首次遇到的字符串复制到常量池，返回的是常量池中字符串的实例引用，但是由StringBuilder创建的字符串实例却会出现在堆上，所以是false； 问题出现了，<br><strong>有些方法会在堆中创建重复的对象而不直接引用常量池。</strong> 知乎高人这么理解的难道每创建一个新实例就去常量池里查找一下，这部分开销怎么办？</li>
+<li>在1.7中该方法不会再复制实例，只是在常量池中记录首次出现的实例引用，所以，是同一个实例。<strong>但是！！</strong>，在jvm中，类似“java”、“int”这样的好像是字符串常量，就算用户不创建，他也会存在，可能是因为在初始化jvm的源码中用到的，所以使用的时候要注意。</li>
+</ol>
+<h3 id="3-2-java8新特性，去永久代"><a href="#3-2-java8新特性，去永久代" class="headerlink" title="3.2 java8新特性，去永久代"></a>3.2 java8新特性，去永久代</h3><p>在JDK8之前的HotSpot虚拟机中，类的元数据和常量池存放在一个叫做永久代的区域，所谓永久代，只是jvm方法区这个概念在hotspot虚拟机中的一种实现而已，在别的虚拟机实现中，并没有永久代这个概念。方法区是java虚拟机规范去中定义的一种概念上的区域，具有什么功能。由于永久代的存在，也确实引发了一些内存泄露的问题，永久代中的元数据可能会随着每一次Full GC发生而进行移动。并且为永久代设置空间大小也是很难确定的，因为这其中有很多影响因素，比如类的总数，常量池的大小和方法数量等。<br>在java8中取消了永久代，方法区作为概念区域仍然存在，原先的永久代中的类的元信息会被放入本地内存(native memory)即元空间metaspace,类的静态变量和内部字符串会被放入堆中，这样可以加载多少类的元数据就不在由MaxPermSize控制, 而由系统的实际可用空间就是系统可用内存空间来控制。</p>
+<h3 id="4-本机直接内存溢出"><a href="#4-本机直接内存溢出" class="headerlink" title="4. 本机直接内存溢出"></a>4. 本机直接内存溢出</h3><p>directmemory导致的内存溢出明显特征就是heap dump文件没有明显异常，若oom后的dump文件很小，程序直接或间接使用了NIO就可能是这个的原因</p>
+
           
         
       
@@ -2503,7 +2604,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -2514,7 +2615,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/pages/index.html">
-                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-count">17</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
