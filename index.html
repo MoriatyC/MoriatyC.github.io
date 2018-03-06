@@ -498,7 +498,7 @@
 <li>该类对应java.lang.Class对象没有在任何地方被引用，无法在任何地方通过反射方位该类的方法</li>
 </ol>
 <p>在java8中由于永久代的废弃，类信息保存在本地内存中，所以废弃类导致oom溢出的情况得到了很大的改善。</p>
-<h1 id="二-垃圾收集算法"><a href="#二-垃圾收集算法" class="headerlink" title="二. 垃圾收集算法"></a>二. 垃圾收集算法</h1><h2 id="1-标记清楚算法"><a href="#1-标记清楚算法" class="headerlink" title="1. 标记清楚算法"></a>1. 标记清楚算法</h2><p>对象真正死亡要经历2次标记过程</p>
+<h1 id="二-垃圾收集算法"><a href="#二-垃圾收集算法" class="headerlink" title="二. 垃圾收集算法"></a>二. 垃圾收集算法</h1><h2 id="1-标记清除算法"><a href="#1-标记清除算法" class="headerlink" title="1. 标记清除算法"></a>1. 标记清除算法</h2><p>对象真正死亡要经历2次标记过程</p>
 <ol>
 <li>对象在进行可达性分析后，没有与GC ROOTS相连接的引用链，那么它会被第一次标记，并进行一次筛选，筛选条件是此对象是否有必要执行的finalize（）方法。以下是2种没有必要执行finalize（）方法的情形。<ol>
 <li>对象没有覆盖finalize（）</li>
@@ -531,7 +531,7 @@
 <li>抢先式中断：所有线程中断，如果有的线程不在安全点上就恢复它，让其执行到安全点再中断，但是几乎没有jvm采用这种方式。</li>
 <li>主动式中断：在和安全点重合的地方设置一个轮询标志，让线程执行的时候主动去轮询这个标志，如果中断标志为真，就自己中断挂起。<h2 id="3-安全区域safe-region"><a href="#3-安全区域safe-region" class="headerlink" title="3. 安全区域safe region"></a>3. 安全区域safe region</h2>针对于处于Sleep状态或者blocked状态的线程，指的是在一段代码片段之中引用关系不会发生变化，在这片区域的任何地方GC都是安全的。<br>当线程执行到安全区域的时候首先会标识自己进入了安全区域，这样在这段时间内都可以进行gc，当要离开安全区域时，会检查是否已经完成了gcroot的枚举，如果完成了就继续执行，否则就等待。</li>
 </ol>
-<h1 id="5-垃圾收集器"><a href="#5-垃圾收集器" class="headerlink" title="5. 垃圾收集器"></a>5. 垃圾收集器</h1><p><img src="E:/picture/memory.png" alt="image"><br>连线代表可搭配使用</p>
+<h1 id="5-垃圾收集器"><a href="#5-垃圾收集器" class="headerlink" title="5. 垃圾收集器"></a>5. 垃圾收集器</h1><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/gc1.png" alt=""><br>连线代表可搭配使用</p>
 <h2 id="1-Serial收集器（Client模式默认新生代收集器，复制算法，单线程）"><a href="#1-Serial收集器（Client模式默认新生代收集器，复制算法，单线程）" class="headerlink" title="1.Serial收集器（Client模式默认新生代收集器，复制算法，单线程）"></a>1.Serial收集器（Client模式默认新生代收集器，复制算法，单线程）</h2><p>在进行垃圾回收的时候，暂停所有正在工作的线程，直到结束。<br>优点：简单高效。<br><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/serial.png" alt=""></p>
 <h2 id="2-ParNew收集器（新生代，复制，多线程）"><a href="#2-ParNew收集器（新生代，复制，多线程）" class="headerlink" title="2. ParNew收集器（新生代，复制，多线程）"></a>2. ParNew收集器（新生代，复制，多线程）</h2><p>ParNew就是Serial的多线程版本，除了多线程外几乎一致。Server模式下的首选新生代收集器，只有他和Serial能和cms配合。使用-XX:+UseParNewGC开关来控制，使用-XX:ParallelGCThreads来设置执行内存回收的线程数。</p>
 <p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/parnew.png" alt=""></p>
@@ -590,6 +590,7 @@
 <blockquote>
 <p>垃圾堆积的价值：回收所获得的空间大小以及回收所需时间的经验值的关系<br>维护一个优先队列，优先回收价值最大的region</p>
 </blockquote>
+<h3 id="g1和cms区别"><a href="#g1和cms区别" class="headerlink" title="g1和cms区别"></a>g1和cms区别</h3><p>CMS收集器：是基于标记清除算法实现的，一般就是初始标记，并发标记，重新标记，并发清除，目的是实现最短的响应回收时间。保证系统的响应时间，减少垃圾收集时的停顿时间<br>G1收集器：他的过程是初始标记、并发标记、最终标记、筛选回收，基于标记整理算法实现，以吞吐量优先，保证保证吞吐量的。</p>
 <p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/g1.png" alt=""></p>
 <h1 id="内存分配机制"><a href="#内存分配机制" class="headerlink" title="内存分配机制"></a>内存分配机制</h1><h3 id="新生代与老年代"><a href="#新生代与老年代" class="headerlink" title="新生代与老年代"></a>新生代与老年代</h3><p>为了优化垃圾回收的性能，将堆分为了新生代和老年代</p>
 <p>优点：</p>
@@ -2767,7 +2768,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
