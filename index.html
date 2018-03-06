@@ -306,6 +306,233 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/06/类加载机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MoriatyC">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Be Better">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/06/类加载机制/" itemprop="url">类加载机制</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-06T21:46:41+08:00">
+                2018-03-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/jvm/" itemprop="url" rel="index">
+                    <span itemprop="name">jvm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/03/06/类加载机制/" class="leancloud_visitors" data-flag-title="类加载机制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="一-虚拟机类加载机制"><a href="#一-虚拟机类加载机制" class="headerlink" title="一. 虚拟机类加载机制"></a>一. 虚拟机类加载机制</h2><h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述:"></a>1. 概述:</h3><p>把描述类的数据从class文件加载到内存，对数据进行校验、转换和初始化，最终形成可被虚拟机使用的java类型。</p>
+<h2 id="2-过程"><a href="#2-过程" class="headerlink" title="2. 过程"></a>2. 过程</h2><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/leijiazai.png" alt=""></p>
+<p>加载、验证、准备、初始化和卸载这五个阶段的顺序是确定的，类的加载过程必须按照这种顺序按部就班的“开始”（仅仅指的是开始，而非执行或者结束，因为这些阶段通常都是互相交叉的混合进行，通常会在一个阶段执行的过程中调用或者激活另一个阶段），而解析阶段则不一定（它在某些情况下可以在初始化阶段之后再开始，这是为了支持Java语言的运行时绑定。</p>
+<p><strong>验证、准备、解析称为连接Linking阶段。</strong></p>
+<p>加载 验证 准备 初始化 卸载 需要按顺序开始</p>
+<h2 id="3-初始化"><a href="#3-初始化" class="headerlink" title="3. 初始化"></a>3. 初始化</h2><p>有且只有5种情况必须立刻初始化的：</p>
+<ol>
+<li>使用new实例化对象，读取或设置一个类的<strong>静态字段</strong>，调用<strong>静态方法</strong>(不包括常量)</li>
+<li>使用java.lang.reflect包对类进行<strong>反射</strong>调用，如果没有进行类初始化，则需要先触发其初始化</li>
+<li>当初始化一个类的时候，如果发现其父类还没初始化，要先触发其父类的初始化</li>
+<li>虚拟机启动时，需要指定一个要执行的主类</li>
+<li>java7动态语言支持，一个java.lang.invoke.MethodHandle实例最后的解析结果REF_getStatic、 REF_putStatic、 REF_invokeStatic方法句柄，并且方法句柄对应的类没有进行过初始化，需要先触发其初始化。(没用过不是很理解)</li>
+</ol>
+<p>以上五种引用类的方法称为主动引用,除此之外都是被动引用。<br>比如： </p>
+<ol>
+<li>通过子类调用父类的静态字段。</li>
+<li>通过数组定义来引用类</li>
+</ol>
+<h3 id="接口初始化"><a href="#接口初始化" class="headerlink" title="接口初始化"></a>接口初始化</h3><p>接口的加载过程与类的加载过程稍有不同。接口中不能使用static{}块。当一个接口在初始化时，并不要求其父接口全部都完成了初始化，只有真正在使用到父接口时（例如引用接口中定义的常量）才会初始化。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">superClass</span></span>&#123;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">"123"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        superClass[] a = <span class="keyword">new</span> superClass[<span class="number">2</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">///会触发一个superClass一维数组类的初始化</span></span><br></pre></td></tr></table></figure>
+<ol>
+<li>引用常量</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.fenixsoft.classloading;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 被动使用类字段演示三：</span></span><br><span class="line"><span class="comment">* 常量在编译阶段会存入调用类的常量池中，本质上没有直接引用到定义常量的类，因此不会触发定义常量的类的初始化。</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConstClass</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">"ConstClass init!"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String HELLOWORLD = <span class="string">"hello world"</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 非主动使用类字段演示</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NotInitialization</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		System.out.println(ConstClass.HELLOWORLD);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>PS：接口的不同，在于第三种，不要求其父接口全部完成了初始化，只有在使用的时候才会初始化。</p>
+<h2 id="二-类加载过程"><a href="#二-类加载过程" class="headerlink" title="二. 类加载过程"></a>二. 类加载过程</h2><h3 id="1-加载"><a href="#1-加载" class="headerlink" title="1. 加载"></a>1. 加载</h3><ol>
+<li>通过一个全限定名来获取定义此类的二进制字节流。</li>
+<li>将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构</li>
+<li>在内存中生成代表这个类的java.lang.Class对象</li>
+</ol>
+<p>加载阶段即可以使用系统提供的类加载器在完成，也可以由用户自定义的类加载器来完成。加载阶段与连接阶段的部分内容(如一部分字节码文件格式验证动作)是交叉进行的，加载阶段尚未完成，连接阶段可能已经开始。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>就是加载类的二进制资源，转为相应的方法区数据结构生成Class对象</p>
+<h3 id="2-验证（连接阶段）"><a href="#2-验证（连接阶段）" class="headerlink" title="2. 验证（连接阶段）"></a>2. 验证（连接阶段）</h3><p>确保Class文件的字节流中包含的信息符合当前虚拟机的要求，并且不会危害虚拟机。</p>
+<ol>
+<li>文件格式验证</li>
+</ol>
+<p>验证字节流是否符合Class文件格式的规范，并且能被当前版本的虚拟机处理。</p>
+<ol>
+<li>元数据验证</li>
+</ol>
+<p>对字节码描述的信息进行语义分析，以保证其描述的信息符合Java语言规范的要求。</p>
+<ol>
+<li>字节码验证</li>
+</ol>
+<p>主要工作是进行数据流和控制流分析，保证被校验类的方法在运行时不会做出危害虚拟机安全的行为</p>
+<ol>
+<li>符号引用验证</li>
+</ol>
+<p>发生在虚拟机将符号引用转化为直接引用的时候，这个转化动作将在“解析阶段”中发生。<br>使用-Xverify:none关闭大部分反复使用的代码验证</p>
+<h3 id="3-准备（连接阶段）"><a href="#3-准备（连接阶段）" class="headerlink" title="3. 准备（连接阶段）"></a>3. 准备（连接阶段）</h3><p>正式为<strong>类变量</strong>分配内存并设置类变量的<strong>初始值</strong>。仅仅包括类变量（static）不包括实例变量，<br>这里的初始值是0，而不是实际值。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value = <span class="number">123</span>;</span><br></pre></td></tr></table></figure></p>
+<p>value=123在类构造器的方法中，在初始化阶段才会执行。<br>若在字段属性表中存在ConstantValue属性，那么在准备阶段就会初始化为所指定的值<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> staic <span class="keyword">final</span> <span class="keyword">int</span> value = <span class="number">123</span>;</span><br></pre></td></tr></table></figure></p>
+<p>在准备阶段就会将value赋值为123</p>
+<h3 id="4-解析（连接阶段）"><a href="#4-解析（连接阶段）" class="headerlink" title="4. 解析（连接阶段）"></a>4. 解析（连接阶段）</h3><p>将常量池符号引用替换为直接引用</p>
+<ul>
+<li>符号引用：内存布局无关，不一定已经加载到内存中</li>
+<li>直接引用：内存布局相关，如果有那么一定在内存中存在</li>
+</ul>
+<p>符号引用：</p>
+<ol>
+<li>类和接口的全限定名 </li>
+<li>字段的名称和描述符 </li>
+<li>方法的名称和描述符</li>
+</ol>
+<h3 id="5-初始化"><a href="#5-初始化" class="headerlink" title="5. 初始化"></a>5. 初始化</h3><p>真正开始执行类中定义的java代码，初始化阶段执行类构造器<clinit><br><strong>自动收集类变量的赋值和静态语句块</strong>，按照出现顺序决定，优先执行父类<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        i = <span class="number">20</span>;<span class="comment">//可以赋值</span></span><br><span class="line">        System.out.println(i);<span class="comment">//不能引用</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> i = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(Demo.i);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></clinit></p>
+<h2 id="三-类加载器（热部署）"><a href="#三-类加载器（热部署）" class="headerlink" title="三. 类加载器（热部署）"></a>三. 类加载器（热部署）</h2><p>只有同一个类加载器加载出来的类，才是真正意义上的相等。</p>
+<ol>
+<li>启动类加载器bootstrap<br> 负责将存放在<java_home>\lib目录或者-Xbootclasspath参数所指定的路径中的类库加载到虚拟机内存中。</java_home></li>
+<li><p>扩展类加载器extension<br> <java_home>\lib\ext目录or java.ext.dirs系统变量指定路径的类库</java_home></p>
+</li>
+<li><p>应用程序类加载器application（系统类加载器）<br> 加载classpath指定类库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">graph BT</span><br><span class="line">扩展类加载器--&gt;启动类加载器</span><br><span class="line">应用程序类加载器--&gt;扩展类加载器</span><br><span class="line">自定义类加载器--&gt;应用程序类加载器</span><br><span class="line">自定义类加载器--&gt;应用程序类加载器</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="双亲委派模型"><a href="#双亲委派模型" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h3><p>除了启动类加载器外，所有的类加载器都有自己的父类加载器，而且是通过组合而不是继承的关系来实现。这样可以保证应用程序的稳定。比如所有的java.lang.object都是通过启动类加载器加载rt.jar中的object实现的</p>
+<h3 id="破坏双亲委派模型实现热部署"><a href="#破坏双亲委派模型实现热部署" class="headerlink" title="破坏双亲委派模型实现热部署"></a>破坏双亲委派模型实现热部署</h3><p>每一个程序模块都有一个自己的类加载器，当需要更换一个模块时，就把模块连同类加载器一起换掉以实现代码的热替换。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/05/GC和内存分配策略/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2510,214 +2737,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/17/线程池(一)/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="MoriatyC">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Be Better">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/17/线程池(一)/" itemprop="url">线程池(一)</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-17T11:17:20+08:00">
-                2018-01-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/并发/" itemprop="url" rel="index">
-                    <span itemprop="name">并发</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/01/17/线程池(一)/" class="leancloud_visitors" data-flag-title="线程池(一)">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>这几天准备深入学习有关并发的知识，所以先简单复习了一下JDK自带的并发包，其中首先比较重要的一个就是线程池了。</p>
-<p>为什么不无限的创造线程？主要基于以下几个原因：</p>
-<ol>
-<li>线程生命周期的开销非常高</li>
-<li>资源消耗</li>
-<li>稳定性</li>
-</ol>
-<p>所谓物极必反，线程的创建和销毁和需要一定的时间，如果所创建的线程工作时间还不如创建销毁的时间长那是得不偿失的，并且当线程创建过多也会对内存造成一定的负担甚至溢出，并且对GC也是极大的消耗，由于存在一定数额的活跃线程也提高了响应性。</p>
-<h1 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h1><p>根据《阿里巴巴Java开发手册》中对线程创建的要求</p>
-<blockquote>
-<ol>
-<li>【强制】线程资源必须通过线程池提供，不允许在应用中自行显式创建线程</li>
-</ol>
-</blockquote>
-<p>由此可见，在正式生产环境中，线程池是唯一的创建线程的方法。而JDK对线程池也有强大的支持。<img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/pool.png" alt=""></p>
-<p>根据《手册》中的另一点要求</p>
-<blockquote>
-<ol>
-<li>【强制】线程池不允许使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样<br>的处理方式让写的同学更加明确线程池的运行规则，规避资源耗尽的风险。<br>说明： Executors 返回的线程池对象的弊端如下：<br>1） FixedThreadPool 和 SingleThreadPool:<br>允许的请求队列长度为 Integer.MAX_VALUE，可能会堆积大量的请求，从而导致 OOM。<br>2） CachedThreadPool 和 ScheduledThreadPool:<br>允许的创建线程数量为 Integer.MAX_VALUE， 可能会创建大量的线程，从而导致 OOM</li>
-</ol>
-</blockquote>
-<p>虽然Executor为我们提供了很多方便的工厂方法，比如<strong>newSingleThreadExecutor()</strong>,也有Executors为我们很好的实现了这些工厂方法，但是手动实现<strong>ThreadPoolExecutor</strong>能让我们对线程池有更深的了解和控制。所以接下来让我们来介绍一下<strong>ThreadPoolExecutor</strong>这个类。</p>
-<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>一个最常见的<strong>ThreadPoolExecutor</strong>构造函数如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ThreadPoolExecutor(<span class="keyword">int</span> corePoolSize, </span><br><span class="line">                   <span class="keyword">int</span> maximumPoolSize, </span><br><span class="line">                   <span class="keyword">long</span> keepAliveTime, </span><br><span class="line">                   TimeUnit unit, </span><br><span class="line">                   BlockingQueue&lt;Runnable&gt; workQueue, </span><br><span class="line">                   ThreadFactory threadFactory, </span><br><span class="line">                   RejectedExecutionHandler handler)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>corePoolSize： 活动线程数</li>
-<li>maximumPoolSize： 线程池上限</li>
-<li>keepAliveTime： 当线程池中线程数超过corePoolSize后，完成工作后的线程存活时间</li>
-<li>unit： 单位<br>其余的几个参数我们会在后面着重介绍。</li>
-</ul>
-<p>这里介绍一下ThreadPoolExecutor的核心工作原理</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> c = ctl.get();</span><br><span class="line">        <span class="keyword">if</span> (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">            <span class="keyword">if</span> (addWorker(command, <span class="keyword">true</span>))</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            c = ctl.get();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">            <span class="keyword">int</span> recheck = ctl.get();</span><br><span class="line">            <span class="keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">                reject(command);</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>)</span><br><span class="line">                addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="keyword">false</span>))</span><br><span class="line">            reject(command);</span><br></pre></td></tr></table></figure>
-<p>workderCountOf()获得当前线程池线程总数，若小于corePoolSize，则直接将任务通过addWorker<br>()方法执行，否则在workQueue.offer()进入等待队列，若进入失败，则任务直接交给线程池，若线程池达到了maximumPoolSize则提交失败执行拒绝策略</p>
-<h2 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h2><h3 id="BlockingQueue：接口，阻塞队列，数据共享通道"><a href="#BlockingQueue：接口，阻塞队列，数据共享通道" class="headerlink" title="BlockingQueue：接口，阻塞队列，数据共享通道"></a>BlockingQueue：接口，阻塞队列，数据共享通道</h3><p>任务队列的作用在于，当线程池中线程数达到corePoolSize的时候，接下来的任务将进入这个队列进行等待，等待执行。</p>
-<h4 id="简单原理"><a href="#简单原理" class="headerlink" title="简单原理"></a>简单原理</h4><p>服务线程（获取队列信息并处理的线程）在队列为空时进行读等待，有新的消息进入队列后自动唤醒，反之，当队列满时进行写等待直到有消息出队。</p>
-<p>不同于常用的offer()和poll()方法，这里我们使用take()和put()方法进行读写。我们以ArrayBlockingQueue的为例子,其中包括了这几个控制对象<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> ReentrantLock lick;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notEmpty;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Condition notFull;</span><br></pre></td></tr></table></figure></p>
-<p>就拿take()来说<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">take</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (count == <span class="number">0</span>)</span><br><span class="line">            notEmpty.await();</span><br><span class="line">        <span class="keyword">return</span> dequeue();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>当队列为空时，他会在<strong>notEmpty</strong>上进行等待，<br>在线程等待时，若有新的元素插入，线程就会被唤醒<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(E x)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert lock.getHoldCount() == 1;</span></span><br><span class="line">    <span class="comment">// assert items[putIndex] == null;</span></span><br><span class="line">    <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">    items[putIndex] = x;</span><br><span class="line">    <span class="keyword">if</span> (++putIndex == items.length)</span><br><span class="line">        putIndex = <span class="number">0</span>;</span><br><span class="line">    count++;</span><br><span class="line">    notEmpty.signal();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="常用实现"><a href="#常用实现" class="headerlink" title="常用实现"></a>常用实现</h4><ul>
-<li>SynchronousQueue(直接提交队列): 一个零容量队列，每个插入操作要对应一个删除操作。提交的任务不会被真实保存，其实就是将新任务交给了线程执行。</li>
-<li>ArrayBlockingQueue(有界任务队列): 这里就会用到线程池中另一个参数<strong>maximumPoolSize</strong>, 若当前线程池中线程小于corePoolSize则直接在线程池中增加线程，若大于，则加入该任务队列，若队列满则继续加入线程池，若线程池中数目多余maximumPoolSize则执行拒绝策略。</li>
-<li>LinkedBlockingQueue(无界任务队列)：如果未指定容量，那么容量将等于 Integer.MAX_VALUE。只要插入元素不会使双端队列超出容量，每次插入后都将动态地创建链接节点。</li>
-<li>PriorityBlockingQueue(优先任务队列)： 一个特殊的无界任务队列，前面两者都是按FIFO的顺序执行，而这个是可以按照优先级执行。<h2 id="拒绝策略"><a href="#拒绝策略" class="headerlink" title="拒绝策略"></a>拒绝策略</h2>JDK内置拒绝策略如下</li>
-<li>AboerPolicy(默认）：直接抛出异常，阻止系统正常工作。</li>
-<li>CallerRunsPolicy: 只要线程池未关闭，该策略直接在调用者线程中，运行当前被丢弃的任务。（伪丢弃，但是任务提交线程性能大幅度下降）</li>
-<li>DiscardOledestPolicy:和名字一样，丢弃最老的一个请求，也就是即将被执行的一个任务，并尝试再次提交当前任务。</li>
-<li>DiscardPolicy: 丢弃无法处理的任务，不给任何处理。</li>
-</ul>
-<h2 id="异常堆栈"><a href="#异常堆栈" class="headerlink" title="异常堆栈"></a>异常堆栈</h2><p>首先给出一个例子：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a, b;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Main</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.a = a;</span><br><span class="line">        <span class="keyword">this</span>.b = b;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ret = a / b;</span><br><span class="line">        System.out.println(ret);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ThreadPoolExecutor pools = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">0</span>, Integer.MAX_VALUE, <span class="number">0L</span>, TimeUnit.SECONDS, </span><br><span class="line">                <span class="keyword">new</span> SynchronousQueue&lt;Runnable&gt;());</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            pools.submit(<span class="keyword">new</span> Main(<span class="number">100</span>, i));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 结果如下</span></span><br><span class="line"><span class="comment">100</span></span><br><span class="line"><span class="comment">33</span></span><br><span class="line"><span class="comment">50</span></span><br><span class="line"><span class="comment">25</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></p>
-<p>可以发现，其中一个显然的异常除数为0不见了，我们可以通过将submit方法改为execute方法来打印部分异常信息，但是我们仍然不能发现他的调用线程在哪儿。<br>这里我们通过扩展线程池给出一种解决办法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> first_maven;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Future;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.SynchronousQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ThreadPoolExecutor;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> <span class="keyword">extends</span> <span class="title">ThreadPoolExecutor</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Main</span><span class="params">(<span class="keyword">int</span> corePoolSize, <span class="keyword">int</span> maximumPoolSize, <span class="keyword">long</span> keepAliveTime, TimeUnit unit,</span></span></span><br><span class="line"><span class="function"><span class="params">            BlockingQueue&lt;Runnable&gt; workQueue)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable task)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.execute(wrap(task, clientTrace(), Thread.currentThread().getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Future&lt;?&gt; submit(Runnable task) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.submit(wrap(task, clientTrace(), Thread.currentThread().getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> Exception <span class="title">clientTrace</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Exception(<span class="string">"Client stack trace"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> Runnable <span class="title">wrap</span><span class="params">(<span class="keyword">final</span> Runnable task, <span class="keyword">final</span> Exception clientStack, String clientThreadName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    task.run();</span><br><span class="line">                &#125; <span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">                    clientStack.printStackTrace();</span><br><span class="line">                    System.out.println(<span class="string">"                             1212"</span>);</span><br><span class="line">                    <span class="keyword">throw</span> e;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>我们通过扩展<strong>ThreadPoolExecutor</strong>，将要执行的Runnable进行包装，通过手动创建异常，获取当前主线程的调用堆栈，从而得到线程池的调用信息，并打印相应的运行异常，这样我们就可以追踪到完整的异常信息。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在使用多线程的时候，要通过<strong>ThreadPoolExecutor</strong>来手动创建，根据当前任务的需求分配相应的线程池大小和阻塞队列以及拒绝策略，这样才能知根知底。</p>
-<h1 id="五-References"><a href="#五-References" class="headerlink" title="五. References"></a>五. References</h1><blockquote>
-<p>《实战Java高并发程序设计》</p>
-<p>《阿里巴巴Java开发手册》</p>
-</blockquote>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2790,7 +2809,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/pages/index.html">
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
