@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Be Better">
 <meta property="og:description" content="引入AOP（Aspect Oriented Programming），即面向切面编程，可以说是OOP（Object Oriented Programming，面向对象编程）的补充和完善。OOP引入封装、继承、多态等概念来建立一种对象层次结构，用于模拟公共行为的一个集合。不过OOP允许开发者定义纵向的关系，但并不适合定义横向的关系，例如日志功能。日志代码往往横向地散布在所有对象层次中，而与它对应的对">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-02-28T11:21:30.936Z">
+<meta property="og:updated_time" content="2018-03-07T04:25:06.742Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AOP">
 <meta name="twitter:description" content="引入AOP（Aspect Oriented Programming），即面向切面编程，可以说是OOP（Object Oriented Programming，面向对象编程）的补充和完善。OOP引入封装、继承、多态等概念来建立一种对象层次结构，用于模拟公共行为的一个集合。不过OOP允许开发者定义纵向的关系，但并不适合定义横向的关系，例如日志功能。日志代码往往横向地散布在所有对象层次中，而与它对应的对">
@@ -476,7 +476,7 @@
 <li>通过<strong>Proxy.newProxyInstance</strong>方法获得代理对象</li>
 </ol>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DynamicProxyHandler</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> Object proxied;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">DynamicProxyHandler</span><span class="params">(Object proxied)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.proxied = proxied;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> Object</span><br><span class="line">  invoke(Object proxy, Method method, Object[] args)</span><br><span class="line">  <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">    System.out.println(<span class="string">"**** proxy: "</span> + proxy.getClass() +</span><br><span class="line">      <span class="string">", method: "</span> + method + <span class="string">", args: "</span> + args);</span><br><span class="line">    <span class="keyword">if</span>(args != <span class="keyword">null</span>)</span><br><span class="line">      <span class="keyword">for</span>(Object arg : args)</span><br><span class="line">        System.out.println(<span class="string">"  "</span> + arg);</span><br><span class="line">    <span class="keyword">return</span> method.invoke(proxied, args);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleDynamicProxy</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">consumer</span><span class="params">(Interface iface)</span> </span>&#123;</span><br><span class="line">    iface.doSomething();</span><br><span class="line">    iface.somethingElse(<span class="string">"bonobo"</span>);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    RealObject real = <span class="keyword">new</span> RealObject();</span><br><span class="line">   </span><br><span class="line">    Interface proxy = (Interface)Proxy.newProxyInstance(</span><br><span class="line">      Interface.class.getClassLoader(),</span><br><span class="line">      <span class="keyword">new</span> Class[]&#123; Interface.class &#125;,</span><br><span class="line">      <span class="keyword">new</span> DynamicProxyHandler(real));</span><br><span class="line">    consumer(proxy)；</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>Proxy.newProxyInstance方法有三个参数，分别是类加载器，一个希望该代理实现的接口列表以及他的被代理对象。</p>
+<p>Proxy.newProxyInstance方法有三个参数，分别是类加载器，一个希望该代理实现的接口列表以及传入他的被代理对象的调用处理器。</p>
 <p>通过 Proxy.newProxyInstance创建的代理对象是在jvm运行时动态生成的一个对象，它并不是我们的InvocationHandler类型，也不是我们定义的那组接口的类型，而是在运行是动态生成的一个对象，并且命名方式都是这样的形式，以$开头，proxy为中，最后一个数字表示对象的标号。</p>
 <p>总体逻辑大概是：通过InvocationHandler来包装被代理的方法，再根据（InvocationHandler）和需要代理的接口生成相应的代理对象，通过将相应的调用转发到代理对象，从而实现功能的包装。</p>
 <p>由于在<strong>Proxy.newProxyInstance</strong>中，所有的方法都是通过h.invoke()实现的，这样就让所有的接口方法都被包裹上代理逻辑，也就是说当执行被代理操作的时候在代理对象内部，实际上是使用invoke()方法将请求转发给了调用处理器进行操作。</p>
@@ -620,7 +620,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-count">16</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -631,7 +631,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -642,7 +642,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/pages/index.html">
-                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
