@@ -1200,7 +1200,8 @@
 <p>局部变量表的内存在编译器完成分配，运行期间不会改变局部变量表的大小。</p>
 <h2 id="3-本地方法栈"><a href="#3-本地方法栈" class="headerlink" title="3. 本地方法栈"></a>3. 本地方法栈</h2><p>作用同上，针对native房阿发</p>
 <h2 id="4-java堆（线程共享）"><a href="#4-java堆（线程共享）" class="headerlink" title="4. java堆（线程共享）"></a>4. java堆（线程共享）</h2><p>存放对象实例，所有的对象实例和数组都要在堆上分配。不需要连续的内存，可以选择固定大小或者可扩展</p>
-<h2 id="5-方法区non-heap（线程共享）"><a href="#5-方法区non-heap（线程共享）" class="headerlink" title="5. 方法区non-heap（线程共享）"></a>5. 方法区non-heap（线程共享）</h2><p>方法区是java堆的逻辑部分（可能因为都是线程共享的？），<strong>存储已经被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据</strong>。jvm规范将他归为堆的逻辑部分，但是他的别名叫Non-Heap。不需要连续的内存，可以选择固定大小或者可扩展</p>
+<h2 id="5-方法区non-heap（线程共享，永生代）"><a href="#5-方法区non-heap（线程共享，永生代）" class="headerlink" title="5. 方法区non-heap（线程共享，永生代）"></a>5. 方法区non-heap（线程共享，永生代）</h2><p>方法区是java堆的逻辑部分（可能因为都是线程共享的？），<strong>存储已经被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据</strong>。jvm规范将他归为堆的逻辑部分，但是他的别名叫Non-Heap。不需要连续的内存，可以选择固定大小或者可扩展</p>
+<p>永生代是java虚拟机在HotSpot上的实现，在去永生代之后，方法区作为逻辑概念仍然存在，只不过是通过元空间的形式实现。</p>
 <h2 id="6-运行时常量池"><a href="#6-运行时常量池" class="headerlink" title="6. 运行时常量池"></a>6. 运行时常量池</h2><p><strong>是方法区的一部分</strong>，Class文件中也有常量池，用于存放编译期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。</p>
 <p>字面量：如文本字符串、声明为final的常量等</p>
 <p>符号引用：</p>
@@ -2824,7 +2825,7 @@
               
               
               <div class="site-state-item site-state-tags">
-                <a href="/pages/index.html">
+                <a href="/tags/index.html">
                   <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
