@@ -453,8 +453,8 @@
 <li>顺便提一句： </li>
 </ul>
 <ol>
-<li>select和poll都只返回可用集合，区别是select有1024个连接的限制</li>
-<li>epoll返回具体可用的连接，现在不仅告诉你sock组里面数据，还会告诉你具体哪个sock有数据，你不用自己去找了。 </li>
+<li>select和poll都只返回可用集合，线程不安全，区别是select有1024个连接的限制</li>
+<li>epoll 现在是线程安全的，返回具体可用的连接，现在不仅告诉你sock组里面数据，还会告诉你具体哪个sock有数据，你不用自己去找了。 </li>
 </ol>
 <h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><blockquote>
 <p><a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">https://www.zhihu.com/question/19732473</a><br>UNIX网络编程(卷一)<br><a href="https://www.zhihu.com/question/32163005" target="_blank" rel="noopener">https://www.zhihu.com/question/32163005</a></p>

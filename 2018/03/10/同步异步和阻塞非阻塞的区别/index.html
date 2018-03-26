@@ -96,7 +96,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/io7.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/io8.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/io9.jpg">
-<meta property="og:updated_time" content="2018-03-10T12:14:43.864Z">
+<meta property="og:updated_time" content="2018-03-26T08:49:56.378Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="同步异步和阻塞非阻塞的区别">
 <meta name="twitter:description" content="吐槽早上五点半胃疼醒了，去医院噼里啪啦检查了一天花了1500啥也没检查出来，继续疼。在排队的时候刷到知乎上的这个问题感觉似懂非懂，这里总结一下看到的几个比较好的解释。 一. I/O模型 阻塞式I/O 非阻塞式I/O I/O复用（select，poll，epoll…） 信号驱动式I/O（SIGIO） 异步I/O（POSIX的aio_系列函数）  一个输入操作一般有两个不同的阶段：  等待数据准备好">
@@ -460,8 +460,8 @@
 <li>顺便提一句： </li>
 </ul>
 <ol>
-<li>select和poll都只返回可用集合，区别是select有1024个连接的限制</li>
-<li>epoll返回具体可用的连接，现在不仅告诉你sock组里面数据，还会告诉你具体哪个sock有数据，你不用自己去找了。 </li>
+<li>select和poll都只返回可用集合，线程不安全，区别是select有1024个连接的限制</li>
+<li>epoll 现在是线程安全的，返回具体可用的连接，现在不仅告诉你sock组里面数据，还会告诉你具体哪个sock有数据，你不用自己去找了。 </li>
 </ol>
 <h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><blockquote>
 <p><a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">https://www.zhihu.com/question/19732473</a><br>UNIX网络编程(卷一)<br><a href="https://www.zhihu.com/question/32163005" target="_blank" rel="noopener">https://www.zhihu.com/question/32163005</a></p>
