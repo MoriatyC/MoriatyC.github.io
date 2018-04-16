@@ -306,6 +306,282 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/29/redis数据安全与性能保障/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MoriatyC">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Be Better">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/29/redis数据安全与性能保障/" itemprop="url">redis数据安全与性能保障</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-29T21:03:54+08:00">
+                2018-01-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/29/redis数据安全与性能保障/" class="leancloud_visitors" data-flag-title="redis数据安全与性能保障">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="一-持久化"><a href="#一-持久化" class="headerlink" title="一.持久化"></a>一.持久化</h2><h4 id="1-快照：-将存在于某一时刻的所有数据都写入硬盘里面"><a href="#1-快照：-将存在于某一时刻的所有数据都写入硬盘里面" class="headerlink" title="1. 快照： 将存在于某一时刻的所有数据都写入硬盘里面"></a>1. 快照： 将存在于某一时刻的所有数据都写入硬盘里面</h4><h5 id="方法："><a href="#方法：" class="headerlink" title="方法："></a>方法：</h5><ol>
+<li>客户端通过向redis发送bgsave命令（创建子进程）</li>
+<li>客户端通过向redis发送save命令，但是会<strong>阻塞</strong>其他命令，所以只有内存不够，或者不怕阻塞的时候才可以用。但是不要创建子进程，不会导致redis停顿，并且由于没有子进程抢资源所以比bgsave快。</li>
+<li>设置了save选项：比如 save 60 10000，表示从最近一次创建快照之后开始算起，当有60s内有10000次写入的时候就会触发bgsave命令，可以有多个save配置，任意一个满足即可。</li>
+<li>通过shutdown接收到关闭请求时，或者接收到标准的term信号，执行save命令</li>
+<li>当一个redis服务器连接另一个redis服务器，想对方发送sync时，若主服务器没执行bgsave，或者并非刚刚执行完，那么主服务器就会执行bgsave。</li>
+</ol>
+<h5 id="缺点：当redis、系统或者硬件中的一个发生崩溃，将丢失最近一次创建快照后的数据。"><a href="#缺点：当redis、系统或者硬件中的一个发生崩溃，将丢失最近一次创建快照后的数据。" class="headerlink" title="缺点：当redis、系统或者硬件中的一个发生崩溃，将丢失最近一次创建快照后的数据。"></a>缺点：当redis、系统或者硬件中的一个发生崩溃，将丢失最近一次创建快照后的数据。</h5><p><strong>TIPS: 将开发环境尽可能的模拟生产环境以得到正确的快照生成速率配置。</strong></p>
+<h4 id="2-AOF：在执行写命令时，将被执行的写命令复制到硬盘里面"><a href="#2-AOF：在执行写命令时，将被执行的写命令复制到硬盘里面" class="headerlink" title="2. AOF：在执行写命令时，将被执行的写命令复制到硬盘里面"></a>2. AOF：在执行写命令时，将被执行的写命令复制到硬盘里面</h4><p>使用appendonlyyes配置选项打开，下图是appendfsync配置选项。</p>
+<table>
+<thead>
+<tr>
+<th>选项目</th>
+<th>同步频率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>always</td>
+<td>每个写操作都要同步写入，严重降低redis速度损耗硬盘寿命</td>
+</tr>
+<tr>
+<td>everysec</td>
+<td>每秒执行一次，将多个写入同步，墙裂推荐</td>
+</tr>
+<tr>
+<td>no</td>
+<td>让os决定，不稳定，不知道会丢失多少数据</td>
+</tr>
+</tbody>
+</table>
+<p>自动配置aof重写：</p>
+<ul>
+<li>auto-aof-rewrite-percentage 100</li>
+<li>auto-aof-rrewrite-min-size 64<br>当启用aof持久化之后，当aof文件体积大于64mb并且体积比上一次大了100%，就会执行bgrewriteaof命令。</li>
+</ul>
+<p><strong>缺点：1.aof文件过大，2. 文件过大导致还原事件过长。<br>但是可以对其进行重写压缩。</strong></p>
+<h2 id="二-复制"><a href="#二-复制" class="headerlink" title="二. 复制"></a>二. 复制</h2><p>就像之前所说当一个从服务器连接一个主服务器的时候，主服务器会创建一个快照文件并将其发送到从服务器。</p>
+<p>在配置中包含slaveof host port选项指定主服务器，启动时候会先执行aof或者快照文件。</p>
+<p>也可以通过发送flaveof no one命令来终止复制操作，通过slaveof host port命令来开始复制一个主服务器，会直接执行下面的连接操作。</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>主服务器操作</th>
+<th>从服务器操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>（等待命令）</td>
+<td>连接主服务器，发送sync命令</td>
+</tr>
+<tr>
+<td>2</td>
+<td>开始执行bgsave，并使用缓冲区记录bgsave之后执行的所有写命令</td>
+<td>根据配置选项决定使用现有数据处理客户端请求还是返回错误</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Bgsave执行完毕，向从服务器发快照，并在发送期间继续用缓冲区记录写命令</td>
+<td>丢弃所有旧数据，载入快照文件</td>
+</tr>
+<tr>
+<td>4</td>
+<td>快照发送完毕，向从服务器发送缓冲区里的写命令</td>
+<td>完成快照解释，开始接受命令</td>
+</tr>
+<tr>
+<td>5</td>
+<td>缓冲区存储的写命令发送完毕：从现在起每执行一个写命令都发给从服务器</td>
+<td>执行主服务器发来的所有存储在缓冲区里的写；并接受执行主服务器发来的写命令</td>
+</tr>
+</tbody>
+</table>
+<h2 id="三-处理故障系统"><a href="#三-处理故障系统" class="headerlink" title="三. 处理故障系统"></a>三. 处理故障系统</h2><h4 id="验证快照和aof文件"><a href="#验证快照和aof文件" class="headerlink" title="验证快照和aof文件"></a>验证快照和aof文件</h4><ul>
+<li>redis-check-aof</li>
+<li>redis-check-dump</li>
+</ul>
+<p>检查aof和快照文件的状态，在有需要的情况下对aof文件进行修复。</p>
+<h4 id="更换新的故障主服务器"><a href="#更换新的故障主服务器" class="headerlink" title="更换新的故障主服务器"></a>更换新的故障主服务器</h4><p>假设A为主服务器，B为从服务器，当机器A发生故障的时候，更换服务器的步骤如下：<br>首先向机器B发送一个save命令，将这个快照文件发送给机器C，在C上启动Redis，让B成为C的从服务器。</p>
+<h4 id="将从服务器升级为主服务器"><a href="#将从服务器升级为主服务器" class="headerlink" title="将从服务器升级为主服务器"></a>将从服务器升级为主服务器</h4><p>将从服务器升级为主服务器，为升级后的主服务器创建从服务器。</p>
+<h3 id="redis事务"><a href="#redis事务" class="headerlink" title="redis事务"></a>redis事务</h3><h2 id="四-事务"><a href="#四-事务" class="headerlink" title="四. 事务"></a>四. 事务</h2><p>multi: 标记一个事务块的开始。</p>
+<p>事务块内的多条命令会按照先后顺序被放进一个队列当中，最后由 EXEC 命令原子性(atomic)地执行。</p>
+<p>exec: 执行所有事务块内的命令。</p>
+<p>假如某个(或某些) key 正处于 WATCH 命令的监视之下，且事务块中有和这个(或这些) key 相关的命令，那么 EXEC 命令只在这个(或这些) key 没有被其他命令所改动的情况下执行并生效，否则该事务被打断(abort)。</p>
+<p>redis的事务包裹在multi命令和exec命令之中，在jedis中通过如下实现<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">        <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisJava</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</span><br><span class="line">    <span class="keyword">static</span> Response&lt;String&gt; ret;</span><br><span class="line">    Jedis conn = <span class="keyword">new</span> Jedis(<span class="string">"localhost"</span>);</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        Transaction t = conn.multi();</span><br><span class="line">        t.incr(<span class="string">"notrans:"</span>);</span><br><span class="line">        Response&lt;String&gt; result1 = t.get(<span class="string">"notrans:"</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1L</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        t.incrBy(<span class="string">"notrans:"</span>, -<span class="number">1</span>);</span><br><span class="line">        t.exec();</span><br><span class="line">        String foolbar = result1.get();       </span><br><span class="line">        System.out.println(foolbar);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Jedis conn = <span class="keyword">new</span> Jedis(<span class="string">"localhost"</span>);</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> RedisJava();</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> RedisJava();</span><br><span class="line">        Thread t3 = <span class="keyword">new</span> RedisJava();</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        t3.start();</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>wathc：<br>监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。</li>
+<li>unwatch：<br>取消 WATCH 命令对所有 key 的监视。<br>如果在执行 WATCH 命令之后， EXEC 命令或 DISCARD 命令先被执行了的话，那么就不需要再执行 UNWATCH 了。<br>的监视，因此这两个命令执行之后，就没有必要执行 UNWATCH 了。</li>
+<li>discard :取消事务，放弃执行事务块内的所有命令。取消watch，清空任务队列。<br>如果正在使用 WATCH 命令监视某个(或某些) key，那么取消所有监视，等同于执行命令 UNWATCH 。</li>
+</ul>
+<p>一个简单的商品买卖demo如下：</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>inventory：id</td>
+<td>set</td>
+</tr>
+<tr>
+<td>market</td>
+<td>zset</td>
+</tr>
+<tr>
+<td>user:id</td>
+<td>hash</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">listItem</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">           Jedis conn, String itemId, String sellerId, <span class="keyword">double</span> price)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       String inventory = <span class="string">"inventory:"</span> + sellerId;</span><br><span class="line">       String item = itemId + <span class="string">'.'</span> + sellerId;</span><br><span class="line">       <span class="keyword">long</span> end = System.currentTimeMillis() + <span class="number">5000</span>;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">while</span> (System.currentTimeMillis() &lt; end) &#123;</span><br><span class="line">           conn.watch(inventory);</span><br><span class="line">           <span class="keyword">if</span> (!conn.sismember(inventory, itemId))&#123;</span><br><span class="line">               conn.unwatch();</span><br><span class="line">               <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           Transaction trans = conn.multi();</span><br><span class="line">           trans.zadd(<span class="string">"market:"</span>, price, item);</span><br><span class="line">           trans.srem(inventory, itemId);</span><br><span class="line">           List&lt;Object&gt; results = trans.exec();</span><br><span class="line">           <span class="comment">// null response indicates that the transaction was aborted due to</span></span><br><span class="line">           <span class="comment">// the watched key changing.</span></span><br><span class="line">           <span class="keyword">if</span> (results == <span class="keyword">null</span>)&#123;</span><br><span class="line">               <span class="keyword">continue</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">purchaseItem</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">           Jedis conn, String buyerId, String itemId, String sellerId, <span class="keyword">double</span> lprice)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       String buyer = <span class="string">"users:"</span> + buyerId;</span><br><span class="line">       String seller = <span class="string">"users:"</span> + sellerId;</span><br><span class="line">       String item = itemId + <span class="string">'.'</span> + sellerId;</span><br><span class="line">       String inventory = <span class="string">"inventory:"</span> + buyerId;</span><br><span class="line">       <span class="keyword">long</span> end = System.currentTimeMillis() + <span class="number">10000</span>;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">while</span> (System.currentTimeMillis() &lt; end)&#123;</span><br><span class="line">           conn.watch(<span class="string">"market:"</span>, buyer);</span><br><span class="line"></span><br><span class="line">           <span class="keyword">double</span> price = conn.zscore(<span class="string">"market:"</span>, item);</span><br><span class="line">           <span class="keyword">double</span> funds = Double.parseDouble(conn.hget(buyer, <span class="string">"funds"</span>));</span><br><span class="line">           <span class="keyword">if</span> (price != lprice || price &gt; funds)&#123;</span><br><span class="line">               conn.unwatch();</span><br><span class="line">               <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           Transaction trans = conn.multi();</span><br><span class="line">           trans.hincrBy(seller, <span class="string">"funds"</span>, (<span class="keyword">int</span>)price);</span><br><span class="line">           trans.hincrBy(buyer, <span class="string">"funds"</span>, (<span class="keyword">int</span>)-price);</span><br><span class="line">           trans.sadd(inventory, itemId);</span><br><span class="line">           trans.zrem(<span class="string">"market:"</span>, item);</span><br><span class="line">           List&lt;Object&gt; results = trans.exec();</span><br><span class="line">           <span class="comment">// null response indicates that the transaction was aborted due to</span></span><br><span class="line">           <span class="comment">// the watched key changing.</span></span><br><span class="line">           <span class="keyword">if</span> (results == <span class="keyword">null</span>)&#123;</span><br><span class="line">               <span class="keyword">continue</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure>
+<p>总结：相比于一般关系型数据库的悲观锁，redis的事务是典型的乐观锁，没有对事务进行封锁，以避免客户端运行过慢造成长时间的阻塞</p>
+<h4 id="非事务型流水线"><a href="#非事务型流水线" class="headerlink" title="非事务型流水线"></a>非事务型流水线</h4><p>使用流水线，减少通信次数提高性能，以jedis为例，对比使用和没使用流水线的函数方法调用次数：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateTokenPipeline</span><span class="params">(Jedis conn, String token, String user, String item)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> timestamp = System.currentTimeMillis() / <span class="number">1000</span>;</span><br><span class="line">    Pipeline pipe = conn.pipelined();</span><br><span class="line">    pipe.multi();</span><br><span class="line">    pipe.hset(<span class="string">"login:"</span>, token, user);</span><br><span class="line">    pipe.zadd(<span class="string">"recent:"</span>, timestamp, token);</span><br><span class="line">    <span class="keyword">if</span> (item != <span class="keyword">null</span>)&#123;</span><br><span class="line">        pipe.zadd(<span class="string">"viewed:"</span> + token, timestamp, item);</span><br><span class="line">        pipe.zremrangeByRank(<span class="string">"viewed:"</span> + token, <span class="number">0</span>, -<span class="number">26</span>);</span><br><span class="line">        pipe.zincrby(<span class="string">"viewed:"</span>, -<span class="number">1</span>, item);</span><br><span class="line">    &#125;</span><br><span class="line">    pipe.exec();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//对比没有使用流水线的方法</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateToken</span><span class="params">(Jedis conn, String token, String user, String item)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> timestamp = System.currentTimeMillis() / <span class="number">1000</span>;</span><br><span class="line">    conn.hset(<span class="string">"login:"</span>, token, user);</span><br><span class="line">    conn.zadd(<span class="string">"recent:"</span>, timestamp, token);</span><br><span class="line">    <span class="keyword">if</span> (item != <span class="keyword">null</span>) &#123;</span><br><span class="line">        conn.zadd(<span class="string">"viewed:"</span> + token, timestamp, item);</span><br><span class="line">        conn.zremrangeByRank(<span class="string">"viewed:"</span> + token, <span class="number">0</span>, -<span class="number">26</span>);</span><br><span class="line">        conn.zincrby(<span class="string">"viewed:"</span>, -<span class="number">1</span>, item);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//测试函数如下</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">benchmarkUpdateToken</span><span class="params">(Jedis conn, <span class="keyword">int</span> duration)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        <span class="meta">@SuppressWarnings</span>(<span class="string">"rawtypes"</span>)</span><br><span class="line">        Class[] args = <span class="keyword">new</span> Class[]&#123;</span><br><span class="line">            Jedis.class, String.class, String.class, String.class&#125;;</span><br><span class="line">        Method[] methods = <span class="keyword">new</span> Method[]&#123;</span><br><span class="line">            <span class="keyword">this</span>.getClass().getDeclaredMethod(<span class="string">"updateToken"</span>, args),</span><br><span class="line">            <span class="keyword">this</span>.getClass().getDeclaredMethod(<span class="string">"updateTokenPipeline"</span>, args),</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">for</span> (Method method : methods)&#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">            <span class="keyword">long</span> end = start + (duration * <span class="number">1000</span>);</span><br><span class="line">            <span class="keyword">while</span> (System.currentTimeMillis() &lt; end)&#123;</span><br><span class="line">                count++;</span><br><span class="line">                method.invoke(<span class="keyword">this</span>, conn, <span class="string">"token"</span>, <span class="string">"user"</span>, <span class="string">"item"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">long</span> delta = System.currentTimeMillis() - start;</span><br><span class="line">            System.out.println(</span><br><span class="line">                    method.getName() + <span class="string">' '</span> +</span><br><span class="line">                    count + <span class="string">' '</span> +</span><br><span class="line">                    (delta / <span class="number">1000</span>) + <span class="string">' '</span> +</span><br><span class="line">                    (count / (delta / <span class="number">1000</span>)));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">catch</span>(Exception e)&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如图所示，在本地运行性能提升大概17.8倍。<img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/benchmark.png" alt=""></p>
+<p>tips：可以使用redis-benchmark工具进行性能测试。</p>
+<h2 id="五-References"><a href="#五-References" class="headerlink" title="五. References"></a>五. References</h2><blockquote>
+<p>《Redis实战》</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/18/线程池(二)/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1499,7 +1775,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-count">17</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1510,7 +1786,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -1521,7 +1797,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/pages/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

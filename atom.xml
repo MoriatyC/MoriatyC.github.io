@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-03-26T08:49:56.378Z</updated>
+  <updated>2018-04-16T14:03:24.664Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>页面级去重-文本相似度计算</title>
+    <link href="http://yoursite.com/2018/04/16/%E9%A1%B5%E9%9D%A2%E7%BA%A7%E5%8E%BB%E9%87%8D-%E6%96%87%E6%9C%AC%E7%9B%B8%E4%BC%BC%E5%BA%A6%E8%AE%A1%E7%AE%97/"/>
+    <id>http://yoursite.com/2018/04/16/页面级去重-文本相似度计算/</id>
+    <published>2018-04-16T13:32:41.000Z</published>
+    <updated>2018-04-16T14:03:24.664Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="一-前言"><a href="#一-前言" class="headerlink" title="一. 前言"></a>一. 前言</h1><p>很久没写博客了，这段时间事情实在是多，很多看到的新知识只能草草的记下来没时间整理。今天下午面完阿里爸爸二面，晚上应该不会再突击我了，趁热把下午遇到的一个没解决的问题记录一下。</p><p>在爬虫去重这个问题上，单纯使用md5这样的完全比较hash算法不是很精确，因为不可能两个网页完全一样，都会有些稍微的更改，这样我们就需要记录并计算两篇文章的相似性进行查重。文章相似性计算应该属于NLP中的内容，由于我是个机器学习小白，所以我尽量使用工程化的思路来解决这个问题。</p><h1 id="二-最小编辑距离"><a href="#二-最小编辑距离" class="headerlink" title="二. 最小编辑距离"></a>二. 最小编辑距离</h1><p>这种方法可能是最简单的方法了，编辑距离（Edit Distance），又称Levenshtein距离，是指两个字串之间，由一个转成另一个所需的最少编辑操作次数。许可的编辑操作包括：</p><ol><li>将一个字符替换成另一个字符</li><li>插入一个字符</li><li>删除一个字符。</li></ol><p>一般来说，编辑距离越小，两个串的相似度越大。然后拿编辑距离去除以两者之间的最大长度，意味着只要变动这么多就可以从A变成B，所以不用变动的字符便代表了相似度。这种方法实现比较简单，在&lt;编程之美&gt;上也有过介绍，主要是通过递归来实现。</p><p>两个字符串A，B的编辑距离最大是他们的长度之和，每次操作之后可能有如下6种情况：</p><ol><li>删除A的第一个字符计算A[2….lenA]，B[1….lenB]</li><li>删除B的第一个字符计算A[1….lenA]，B[2….lenB]</li><li>修改A的第一个字符计算A[2….lenA]，B[2….lenB]</li><li>修改B的第一个字符计算A[2….lenA]，B[2….lenB]</li><li>插入A的第一个字符到B计算A[1….lenA]，B[2….lenB]</li><li>插入B的第一个字符到A计算A[2….lenA]，B[1….lenB]</li></ol><p>我们可以将上述的6中情况合并成3种：</p><ol><li>一步操作后计算A[2….lenA]，B[1….lenB]</li><li>一步操作后计算A[1….lenA]，B[2….lenB]</li><li>一步操作后计算A[2….lenA]，B[2….lenB]</li></ol><p>然后每次获得三者中最小的一个再+1进行迭代即可。这种方法最简单也是最容易实现，但是可能每来一篇文章都需要和文档库中的文章进行比较，而且文章过长的话，递归深度也很大。</p><h1 id="三-simhash"><a href="#三-simhash" class="headerlink" title="三. simhash"></a>三. simhash</h1><h2 id="1-TF-IDF"><a href="#1-TF-IDF" class="headerlink" title="1. TF-IDF"></a>1. TF-IDF</h2><blockquote><p>TF-IDF是一种统计方法，用以评估一字词对于一个文件集或一个语料库中的其中一份文件的重要程度。字词的重要性随着它在文件中出现的次数成正比增加，但同时会随着它在语料库中出现的频率成反比下降。TF-IDF加权的各种形式常被搜索引擎应用，作为文件与用户查询之间相关程度的度量或评级。除了TF-IDF以外，因特网上的搜索引擎还会使用基于链接分析的评级方法，以确定文件在搜寻结果中出现的顺序。</p></blockquote><p>这是摘自百度百科的解释，简而言之就是一个词语在一篇文章中出现的次数越多说明他越重要，一个词在文档库中出现的次数越少说明他越有代表性，利用这两个值进行一个权值相乘的计算，就能代表一个词语对于一个文章的重要程度。</p><h2 id="2-simhash的实现"><a href="#2-simhash的实现" class="headerlink" title="2. simhash的实现"></a>2. simhash的实现</h2><p>simhash是谷歌发明的算法，据说很nb，可以将一个文档转换成64位的字节，然后我们可以通过判断两个字节的汉明距离就知道是否相似了。</p><p>在信息论中，两个等长字符串之间的汉明距离是两个字符串对应位置的不同字符的个数。换句话说，它就是将一个字符串变换成另外一个字符串所需要替换的字符个数。例如：</p><p>1011101 与 1001001 之间的汉明距离是 2。</p><p>首先我们来计算SimHash：</p><ol><li>提取文档关键词得到[word,weight]这个一个数组。（举例 [美国，4]）</li><li>用hash算法将word转为固定长度的二进制值的字符串[hash(word),weight]。（举例 [100101，4]）</li><li>word的hash从左到右与权重相乘，如果为1则乘以1 ，如果是0则曾以-1。（举例4,-4,-4,4,-4,4）</li><li>接着计算下个数，直到将所有分词得出的词计算完，然后将每个词第三步得出的数组中的每一个值相加。（举例美国和51区，[4,-4,-4,4,-4,4]和[5 -5 5 -5 5 5]得到[9 -9 1 -1 1 9]）</li><li>对第四步得到的数组中每一个值进行判断，如果＞0记为1，如果＜0记为0。（举例[101011]）</li></ol><p><img src="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/simhash.jpg" alt=""><br>第四步得出的就是这个文档的SimHash。</p><p>这样我们就能将两个不同长度的文档转换为同样长度的SimHash值，so，我们现在可以计算第一个文档的值和第二个文档的汉明距离（一般&lt;3就是相似度高的）。</p><p>SimHash本质上是局部敏感性的hash（如果是两个相似的句子，那么只会有部分不同），和md5之类的不一样。 正因为它的局部敏感性，所以我们可以使用海明距离来衡量SimHash值的相似度。</p><p>如果想要小数形式的可以这么做：1 - 汉明距离 / 最长关键词数组长度。</p><h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><blockquote><p>&lt;编程之美&gt;<br><a href="https://blog.csdn.net/chinafire525/article/details/78686876" target="_blank" rel="noopener">https://blog.csdn.net/chinafire525/article/details/78686876</a></p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;一-前言&quot;&gt;&lt;a href=&quot;#一-前言&quot; class=&quot;headerlink&quot; title=&quot;一. 前言&quot;&gt;&lt;/a&gt;一. 前言&lt;/h1&gt;&lt;p&gt;很久没写博客了，这段时间事情实在是多，很多看到的新知识只能草草的记下来没时间整理。今天下午面完阿里爸爸二面，晚上应该不会
+      
+    
+    </summary>
+    
+      <category term="机器学习" scheme="http://yoursite.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+      <category term="nlp" scheme="http://yoursite.com/tags/nlp/"/>
+    
+      <category term="爬虫" scheme="http://yoursite.com/tags/%E7%88%AC%E8%99%AB/"/>
+    
+  </entry>
   
   <entry>
     <title>同步异步和阻塞非阻塞的区别</title>
@@ -313,9 +340,9 @@
       <category term="并发" scheme="http://yoursite.com/categories/%E5%B9%B6%E5%8F%91/"/>
     
     
-      <category term="多线程" scheme="http://yoursite.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
       <category term="容器" scheme="http://yoursite.com/tags/%E5%AE%B9%E5%99%A8/"/>
+    
+      <category term="多线程" scheme="http://yoursite.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
@@ -341,9 +368,9 @@
       <category term="并发" scheme="http://yoursite.com/categories/%E5%B9%B6%E5%8F%91/"/>
     
     
-      <category term="多线程" scheme="http://yoursite.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
       <category term="容器" scheme="http://yoursite.com/tags/%E5%AE%B9%E5%99%A8/"/>
+    
+      <category term="多线程" scheme="http://yoursite.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
