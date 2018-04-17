@@ -88,7 +88,7 @@
 <meta property="og:description" content="设计思路因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些跟排行榜本身相关的要求比如： 排行精确性如果一个排行榜的结果关系到用户的权益问题，这个时候一个排行榜的精确性就需要非常高，比如一个运营同学进行了根据微博转发数量的营销活动，这个时候微博转发数量的排行榜就需要非常精确，否则会影响用户权益的分发。 排行榜实时性游戏和社交互">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/MoriatyC/MoriatyC.github.io/master/images/xiaoguo.png">
-<meta property="og:updated_time" content="2018-02-04T12:14:42.650Z">
+<meta property="og:updated_time" content="2018-04-17T01:19:52.019Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="redis排行榜">
 <meta name="twitter:description" content="设计思路因为看了一段时间的redis，准备动手做一个小demo，做一个排行榜，正好加在之前的未完成的新闻门户里面。关于排行榜他有一些跟排行榜本身相关的要求比如： 排行精确性如果一个排行榜的结果关系到用户的权益问题，这个时候一个排行榜的精确性就需要非常高，比如一个运营同学进行了根据微博转发数量的营销活动，这个时候微博转发数量的排行榜就需要非常精确，否则会影响用户权益的分发。 排行榜实时性游戏和社交互">
@@ -417,7 +417,7 @@
 <p>由于文章是从别的地方爬过来的，所以只有评论数没有点赞数，设置初始化分数为：</p>
 <p><strong>score = 发布时间毫秒数 + 432 * 评论数</strong></p>
 <p>而问题就在排行榜更新的频率，更新过快，缓存效果不好，会产生类似重建热key的问题（下一篇文章要讲一下），但是频率过慢又不能达到实时性，所以正如之前所说的，要根据排行榜自身的要求制定一个适合的更新策略：</p>
-<p>针对自身的这个项目需求，我想实现的是一个热点新闻排行榜，他的时效性要求并不是很高，所以通过分析网易新闻的爬取量，对爬到的每个新闻建立一个<strong>news：id</strong>进行初始化，并设置一周后过期自动删除，排行榜肯定是用zset的，但是为了不刷新过快，再建立一个zset缓存最近一个星期的文章，通过一个定时任务，每周一次定时维护<strong>time：</strong>，从<strong>time:</strong> 删除时间超过一个星期的文章，并重置<strong>score：</strong>，由于爬虫每隔6小时更新一次，且新闻量相对较小，所以对time：的频繁读写是可以容忍的。所以总的来说就是</p>
+<p>针对自身的这个项目需求，我想实现的是一个热点新闻排行榜，他的时效性要求并不是很高，所以通过分析网易新闻的爬取量，对爬到的每个新闻建立一个<strong>news：id</strong>的hash进行初始化，类似关系型数据库中的一条字段，并设置一周后过期自动删除，排行榜肯定是用zset的，但是为了不刷新过快，再建立一个time：的zset缓存最近一个星期的文章，设置一周过期，每周一次定时维护<strong>time：</strong>，从<strong>time:</strong> 删除时间超过一个星期的文章，并重置<strong>score：</strong>，由于爬虫每隔6小时更新一次，且新闻量相对较小，所以对time：的频繁读写是可以容忍的，再维护一个score：的zset简历news和score的映射，所以总的来说就是</p>
 <ol>
 <li>爬取新闻，建立新的hash(news:id),设置过期时间为一周，并加入zset(time：)</li>
 <li>每周执行一次更新，删除zset：中过期的任务，对未过期的任务分数进行更新。</li>
